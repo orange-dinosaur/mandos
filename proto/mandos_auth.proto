@@ -1,0 +1,29 @@
+syntax = "proto3";
+package mandos_auth;
+
+service MandosAuth {
+    // Login - Takes a username and password and returns a session_id
+    rpc Login(LoginRequest) returns (LoginResponse) {}
+
+    // Register - Takes a username, an email and password and returns a success bool
+    rpc Register(RegisterRequest) returns (RegisterResponse) {}
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string session_id = 1;
+}
+
+message RegisterRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message RegisterResponse {
+    bool success = 1;
+}

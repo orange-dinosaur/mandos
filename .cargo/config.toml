@@ -1,0 +1,18 @@
+# Cargo config file
+# https://doc.rust-lang.org/cargo/reference/config.html
+
+# Environment variables set for all `cargo ...` commands
+[env]
+
+# Scope down tracing, to filter out external lib tracing
+RUST_LOG="mandos=debug"
+
+# -- Service Environment Variables
+# IMPORTANT: 
+#   For cargo commands only.
+#   For deployed env, should be managed by container 
+#   (e.g., Kubernetes).
+
+# gRPC AUTH
+SERVICE_GRPC_AUTH_KEY_TEST="halls_of_mandos"
+SERVICE_GRPC_AUTH_KEY_DEV="halls_of_mandos"
