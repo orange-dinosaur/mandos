@@ -32,12 +32,10 @@ async fn main() -> Result<()> {
     dotenv().ok();
 
     // Setup tracing
-    let subscriber = tracing_subscriber::FmtSubscriber::new();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
-    /* tracing_subscriber::fmt()
-    .with_target(false)
-    .with_env_filter(EnvFilter::from_default_env())
-    .init(); */
+    tracing_subscriber::fmt()
+        .with_max_level(config().TRACING_MAX_LEVEL)
+        .with_target(false)
+        .init();
 
     // region: setup gRPC server
     let addr = config().SERVER_ADDR.parse()?;

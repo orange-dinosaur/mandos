@@ -21,7 +21,6 @@ impl MandosAuth for ServiceMandosAuth {
         request: Request<LoginRequest>,
     ) -> Result<Response<LoginResponse>, Status> {
         debug!("FN: login - Service to login user");
-        println!("-->> FN: login - Service to login user");
 
         let login_request = request.into_inner();
 
@@ -51,7 +50,6 @@ impl MandosAuth for ServiceMandosAuth {
         request: Request<RegisterRequest>,
     ) -> Result<Response<RegisterResponse>, Status> {
         debug!("FN: register - Service to register user");
-        println!("-->> FN: register - Service to register user");
 
         let register_request = request.into_inner();
 
@@ -70,7 +68,6 @@ impl MandosAuth for ServiceMandosAuth {
 
 pub fn check_auth(request: Request<()>) -> std::result::Result<Request<()>, Status> {
     debug!("FN: check_auth - Verifying auth token");
-    println!("-->> FN: check_auth - Verifying auth token");
 
     let request_grpc_auth_value: String;
     match request.metadata().get(&config().GRPC_AUTH_KEY) {

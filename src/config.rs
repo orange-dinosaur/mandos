@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use tracing::Level;
 
 use crate::error::{Error, Result};
 use std::{env, str::FromStr, sync::OnceLock};
@@ -43,6 +44,9 @@ pub struct Config {
 
     pub SERVER_ADDR: String,
 
+    // Tracing
+    pub TRACING_MAX_LEVEL: tracing::Level,
+
     // gRPC server auth credentials
     pub GRPC_AUTH_KEY: String,
 
@@ -80,6 +84,8 @@ impl Config {
 
         let server_addr = get_server_addr(&environment)?;
 
+        let tracing_max_level = get_tracing_max_level(&environment)?;
+
         let grpc_auth_key = get_grpc_auth_key(&environment)?;
 
         let db_url = get_db_url(&environment)?;
@@ -92,6 +98,8 @@ impl Config {
             ENVIRONMENT: environment,
 
             SERVER_ADDR: server_addr,
+
+            TRACING_MAX_LEVEL: tracing_max_level,
 
             GRPC_AUTH_KEY: grpc_auth_key,
 
@@ -134,6 +142,20 @@ fn get_server_addr(env: &Environment) -> Result<String> {
             let server_url = get_env("SERVER_URL")?;
 
             return Ok(server_url + ":" + &port_prod);
+        }
+    }
+}
+
+fn get_tracing_max_level(env: &Environment) -> Result<Level> {
+    match env {
+        Environment::Test => {
+            return Ok(tracing::Level::DEBUG);
+        }
+        Environment::Development => {
+            return Ok(tracing::Level::DEBUG);
+        }
+        Environment::Production => {
+            return Ok(tracing::Level::INFO);
         }
     }
 }
