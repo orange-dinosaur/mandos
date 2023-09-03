@@ -5,7 +5,7 @@
 [env]
 
 # Scope down tracing, to filter out external lib tracing
-RUST_LOG="mandos=debug"
+RUST_LOG="server=debug"
 
 # -- Service Environment Variables
 # IMPORTANT: 

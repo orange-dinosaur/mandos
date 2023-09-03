@@ -34,6 +34,7 @@ async fn main() -> Result<()> {
     // Setup tracing
     tracing_subscriber::fmt()
         .with_max_level(config().TRACING_MAX_LEVEL)
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .with_target(false)
         .init();
 
