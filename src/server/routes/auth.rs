@@ -1,9 +1,15 @@
 use tonic::{Response, Status};
 use tracing::debug;
 
-use crate::mandos_auth::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse};
+use crate::{
+    mandos_auth::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse},
+    model::{user_auth, ModelManager},
+};
 
-pub async fn login(login_request: LoginRequest) -> Result<Response<LoginResponse>, Status> {
+pub async fn login(
+    login_request: LoginRequest,
+    _model_maanger: ModelManager,
+) -> Result<Response<LoginResponse>, Status> {
     debug!("FN: login - Service to login user");
 
     // check that the fields are not empty
@@ -29,6 +35,7 @@ pub async fn login(login_request: LoginRequest) -> Result<Response<LoginResponse
 
 pub async fn register(
     register_request: RegisterRequest,
+    _model_maanger: ModelManager,
 ) -> Result<Response<RegisterResponse>, Status> {
     debug!("FN: register - Service to register user");
 
@@ -38,6 +45,23 @@ pub async fn register(
         || register_request.password.is_empty()
     {
         return Err(Status::invalid_argument("one ore more fields are empty"));
+    }
+
+    let user_auth_for_create = user_auth::UserAuthForCreate {
+        username: register_request.username,
+        email: register_request.email,
+        password: register_request.password,
+    };
+
+    // create user in the db
+    let db_res = user_auth::UserAuthBmc::create(&_model_maanger, user_auth_for_create).await;
+    match db_res {
+        Ok(id) => {
+            debug!("User created with id: {}", id);
+        }
+        Err(e) => {
+            return Err(Status::internal(e.to_string()));
+        }
     }
 
     let res = RegisterResponse { success: true };

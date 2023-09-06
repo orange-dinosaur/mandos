@@ -9,14 +9,23 @@ use crate::{
         LoginRequest, LoginResponse, RegisterRequest, RegisterResponse,
     },
     mandos_auth_proto,
+    model::{self, ModelManager},
     server::middleware::check_auth,
 };
 
 mod middleware;
 mod routes;
 
-#[derive(Debug, Default)]
-pub struct ServiceMandosAuth {}
+#[derive(Debug)]
+pub struct ServiceMandosAuth {
+    model_manager: model::ModelManager,
+}
+
+impl ServiceMandosAuth {
+    pub fn new(model_manager: model::ModelManager) -> Self {
+        Self { model_manager }
+    }
+}
 
 #[tonic::async_trait]
 impl MandosAuth for ServiceMandosAuth {
@@ -24,20 +33,20 @@ impl MandosAuth for ServiceMandosAuth {
         &self,
         request: Request<LoginRequest>,
     ) -> Result<Response<LoginResponse>, Status> {
-        routes::auth::login(request.into_inner()).await
+        routes::auth::login(request.into_inner(), self.model_manager.clone()).await
     }
 
     async fn register(
         &self,
         request: Request<RegisterRequest>,
     ) -> Result<Response<RegisterResponse>, Status> {
-        routes::auth::register(request.into_inner()).await
+        routes::auth::register(request.into_inner(), self.model_manager.clone()).await
     }
 }
 
-pub async fn start() -> CustomResult<()> {
+pub async fn start(model_manager: ModelManager) -> CustomResult<()> {
     let addr = config().SERVER_ADDR.parse()?;
-    let mandos_auth = ServiceMandosAuth::default();
+    let mandos_auth = ServiceMandosAuth::new(model_manager.clone());
 
     info!("Starting gRPC server on {}", addr);
 

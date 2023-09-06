@@ -3,10 +3,14 @@ use error::Result;
 
 pub use config::config;
 
+use crate::model::ModelManager;
+
 pub mod config;
 pub mod error;
 pub mod mandos_auth;
+pub mod model;
 pub mod server;
+pub mod utils;
 
 mod mandos_auth_proto {
     #![allow(non_snake_case)]
@@ -32,8 +36,11 @@ async fn main() -> Result<()> {
         .with_target(false)
         .init();
 
+    // Initialize ModelManager
+    let model_manager = ModelManager::new().await?;
+
     // start gRPC server
-    server::start().await?;
+    server::start(model_manager).await?;
 
     Ok(())
 }
