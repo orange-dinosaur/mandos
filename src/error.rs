@@ -22,13 +22,13 @@ pub enum Error {
     // SQLx errors
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
     SqlxMigrate(#[serde_as(as = "DisplayFromStr")] MigrateError),
-    EntityNotFound { entity: &'static str, id: String },
+    SqlxEntityNotFound { entity: &'static str, id: String },
 
     // Argon2 errors
     Argon2Error(#[serde_as(as = "DisplayFromStr")] argon2::Error),
     Argon2ErrorPasswordHash(#[serde_as(as = "DisplayFromStr")] password_hash::Error),
 
-    // Register errors
+    // UserAuth errors
     UsernameNotSet,
     EmailNotSet,
     PasswordNotSet,

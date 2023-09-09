@@ -126,7 +126,7 @@ fn get_server_addr(env: &Environment) -> Result<String> {
                 |p| p.parse::<String>().unwrap_or(default_server_url()),
             );
 
-            return Ok(server_url + ":" + &port);
+            Ok(server_url + ":" + &port)
         }
         Environment::Development => {
             let server_url = get_env("SERVICE_SERVER_URL_DEV").map_or_else(
@@ -134,29 +134,23 @@ fn get_server_addr(env: &Environment) -> Result<String> {
                 |p| p.parse::<String>().unwrap_or(default_server_url()),
             );
 
-            return Ok(server_url + ":" + &port);
+            Ok(server_url + ":" + &port)
         }
         Environment::Production => {
             // in production the server url and the port have to be set
             let port_prod = get_env("PORT_prod")?;
             let server_url = get_env("SERVER_URL")?;
 
-            return Ok(server_url + ":" + &port_prod);
+            Ok(server_url + ":" + &port_prod)
         }
     }
 }
 
 fn get_tracing_max_level(env: &Environment) -> Result<Level> {
     match env {
-        Environment::Test => {
-            return Ok(tracing::Level::DEBUG);
-        }
-        Environment::Development => {
-            return Ok(tracing::Level::DEBUG);
-        }
-        Environment::Production => {
-            return Ok(tracing::Level::INFO);
-        }
+        Environment::Test => Ok(tracing::Level::DEBUG),
+        Environment::Development => Ok(tracing::Level::DEBUG),
+        Environment::Production => Ok(tracing::Level::INFO),
     }
 }
 
@@ -168,7 +162,7 @@ fn get_grpc_auth_key(env: &Environment) -> Result<String> {
                 |p| p.parse::<String>().unwrap_or(default_grpc_auth_key()),
             );
 
-            return Ok(grpc_auth_key);
+            Ok(grpc_auth_key)
         }
         Environment::Development => {
             let grpc_auth_key = get_env("SERVICE_GRPC_AUTH_KEY_DEV").map_or_else(
@@ -176,13 +170,13 @@ fn get_grpc_auth_key(env: &Environment) -> Result<String> {
                 |p| p.parse::<String>().unwrap_or(default_grpc_auth_key()),
             );
 
-            return Ok(grpc_auth_key);
+            Ok(grpc_auth_key)
         }
         Environment::Production => {
             // in production the server auth key and the value have to be set
             let grpc_auth_key = get_env("SERVICE_GRPC_AUTH_KEY_TEST")?;
 
-            return Ok(grpc_auth_key);
+            Ok(grpc_auth_key)
         }
     }
 }
@@ -196,9 +190,9 @@ fn get_db_url(env: &Environment) -> Result<String> {
             let db_port = get_env("SERVICE_DB_PORT_TEST")?;
             let db_name = get_env("SERVICE_DB_NAME_TEST")?;
 
-            return Ok(format!(
+            Ok(format!(
                 "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            ));
+            ))
         }
         Environment::Development => {
             let db_user = get_env("SERVICE_DB_USER_DEV")?;
@@ -207,9 +201,9 @@ fn get_db_url(env: &Environment) -> Result<String> {
             let db_port = get_env("SERVICE_DB_PORT_DEV")?;
             let db_name = get_env("SERVICE_DB_NAME_DEV")?;
 
-            return Ok(format!(
+            Ok(format!(
                 "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            ));
+            ))
         }
         Environment::Production => {
             let db_user = get_env("DB_USER")?;
@@ -218,9 +212,9 @@ fn get_db_url(env: &Environment) -> Result<String> {
             let db_port = get_env("DB_PORT")?;
             let db_name = get_env("DB_NAME")?;
 
-            return Ok(format!(
+            Ok(format!(
                 "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            ));
+            ))
         }
     }
 }

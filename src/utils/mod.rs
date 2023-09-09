@@ -13,7 +13,7 @@ pub fn hash_password(password: String) -> Result<String, Error> {
     let salt = SaltString::generate(&mut OsRng);
 
     // Hash password to PHC string ($argon2id$v=19$...) and return it
-    let password_hash = argon2.hash_password(&password.as_bytes(), &salt)?;
+    let password_hash = argon2.hash_password(password.as_bytes(), &salt)?;
 
     Ok(password_hash.to_string())
 }
@@ -26,7 +26,7 @@ pub fn verify_password(password: String, password_hash: String) -> Result<(), Er
     let parsed_hash = PasswordHash::new(&password_hash)?;
 
     // Verify password against hash
-    argon2.verify_password(&password.as_bytes(), &parsed_hash)?;
+    argon2.verify_password(password.as_bytes(), &parsed_hash)?;
 
     Ok(())
 }

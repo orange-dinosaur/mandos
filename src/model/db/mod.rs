@@ -21,5 +21,5 @@ pub async fn new_db_pool() -> Result<Db> {
         .acquire_timeout(Duration::from_millis(5000))
         .connect(&config().DB_URL)
         .await
-        .map_err(|e| Error::Sqlx(e))
+        .map_err(Error::Sqlx)
 }

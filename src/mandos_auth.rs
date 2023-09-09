@@ -4,6 +4,8 @@ pub struct LoginRequest {
     #[prost(string, tag = "1")]
     pub username: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
+    pub email: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
     pub password: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

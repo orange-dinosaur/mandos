@@ -1,3 +1,5 @@
+use std::vec;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -120,6 +122,10 @@ impl UserAuthForCreate {
     }
 
     pub fn hash_password(self) -> Result<Self> {
+        if self.password.is_empty() {
+            return Err(Error::PasswordNotSet);
+        }
+
         let hashed_password = utils::hash_password(self.password)?;
 
         Ok(Self {
@@ -131,17 +137,111 @@ impl UserAuthForCreate {
 
 // endregion: UserAuthForCreate
 
+// region: UserAuthForUpdate
+
+#[derive(Deserialize)]
+pub struct UserAuthForUpdate {
+    pub updated_at: DateTime<Utc>,
+    pub last_login: Option<DateTime<Utc>>,
+    pub needs_verify: Option<bool>,
+    pub is_blocked: Option<bool>,
+    pub username: Option<String>,
+    pub email: Option<String>,
+    pub password: Option<String>,
+}
+
+impl Default for UserAuthForUpdate {
+    fn default() -> Self {
+        Self {
+            updated_at: chrono::Utc::now(),
+            last_login: None,
+            needs_verify: None,
+            is_blocked: None,
+            username: None,
+            email: None,
+            password: None,
+        }
+    }
+}
+
+impl UserAuthForUpdate {
+    pub fn new() -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
+
+    pub fn hash_password(self) -> Result<Self> {
+        let pwd = self.password.ok_or(Error::PasswordNotSet)?;
+
+        if pwd.is_empty() {
+            return Err(Error::PasswordNotSet);
+        }
+
+        let hashed_password = utils::hash_password(pwd)?;
+
+        Ok(Self {
+            password: Some(hashed_password),
+            ..self
+        })
+    }
+}
+
+impl Iterable for UserAuthForUpdate {
+    fn get_fields(&self) -> (Vec<String>, Vec<IterableType>) {
+        let mut fields_names = Vec::new();
+        let mut fields_values = Vec::new();
+
+        fields_names.push("updated_at".to_string());
+        fields_values.push(IterableType::DateTime(self.updated_at));
+
+        if self.last_login.is_some() {
+            fields_names.push("last_login".to_string());
+            fields_values.push(IterableType::DateTime(self.last_login.unwrap()));
+        }
+
+        if self.needs_verify.is_some() {
+            fields_names.push("needs_verify".to_string());
+            fields_values.push(IterableType::Bool(self.needs_verify.unwrap()));
+        }
+
+        if self.is_blocked.is_some() {
+            fields_names.push("is_blocked".to_string());
+            fields_values.push(IterableType::Bool(self.is_blocked.unwrap()));
+        }
+
+        if self.username.is_some() {
+            fields_names.push("username".to_string());
+            fields_values.push(IterableType::String(self.username.clone().unwrap()));
+        }
+
+        if self.email.is_some() {
+            fields_names.push("email".to_string());
+            fields_values.push(IterableType::String(self.email.clone().unwrap()));
+        }
+
+        if self.password.is_some() {
+            fields_names.push("password".to_string());
+            fields_values.push(IterableType::String(self.password.clone().unwrap()));
+        }
+
+        (fields_names, fields_values)
+    }
+}
+
+// endregion: UserAuthForUpdate
+
 // region: UserAuth Backend ModelController
 
 pub struct UserAuthBmc;
 
 impl UserAuthBmc {
-    pub async fn create(_model_maanger: &ModelManager, _ua_fc: UserAuthForCreate) -> Result<Uuid> {
-        let user_auth = UserAuth::new(_ua_fc)?;
+    pub async fn create(model_maanger: &ModelManager, ua_fc: UserAuthForCreate) -> Result<Uuid> {
+        let user_auth = UserAuth::new(ua_fc)?;
 
-        let res_uuid = crud::create(_model_maanger.db().clone(), "users_auth", user_auth).await?;
+        let res = crud::create(model_maanger.db().clone(), "users_auth", user_auth).await?;
 
-        let user_auth_created = UserAuth::from_row(&res_uuid)?;
+        let user_auth_created = UserAuth::from_row(&res)?;
 
         Ok(user_auth_created.id)
     }
@@ -150,23 +250,66 @@ impl UserAuthBmc {
         todo!()
     }
 
-    pub async fn _get_username(
-        _model_maanger: &ModelManager,
-        _username: String,
+    pub async fn get_from_username(
+        model_maanger: &ModelManager,
+        username: String,
     ) -> Result<UserAuth> {
-        todo!()
+        let res = crud::get_one_by_field(
+            model_maanger.db().clone(),
+            "users_auth",
+            "username",
+            IterableType::String(username),
+        )
+        .await?;
+
+        let user_auth = UserAuth::from_row(&res)?;
+
+        Ok(user_auth)
     }
 
-    pub async fn _get_all(_model_maanger: &ModelManager) -> Result<Vec<UserAuth>> {
-        todo!()
+    pub async fn get_from_email(
+        model_maanger: &ModelManager,
+        username: String,
+    ) -> Result<UserAuth> {
+        let res = crud::get_one_by_field(
+            model_maanger.db().clone(),
+            "users_auth",
+            "email",
+            IterableType::String(username),
+        )
+        .await?;
+
+        let user_auth = UserAuth::from_row(&res)?;
+
+        Ok(user_auth)
     }
 
-    pub async fn _update(_model_maanger: &ModelManager, _id: Uuid) -> Result<()> {
-        todo!()
+    pub async fn get_all(model_maanger: &ModelManager) -> Result<Vec<UserAuth>> {
+        let res = crud::get_all(model_maanger.db().clone(), "users_auth").await?;
+
+        let mut user_auths = Vec::new();
+        for user_auth in res {
+            let ua = UserAuth::from_row(&user_auth)?;
+            user_auths.push(ua);
+        }
+
+        Ok(user_auths)
     }
 
-    pub async fn _delete(_model_maanger: &ModelManager, _id: Uuid) -> Result<()> {
-        todo!()
+    pub async fn update(
+        model_maanger: &ModelManager,
+        ua_fu: UserAuthForUpdate,
+        id: Uuid,
+    ) -> Result<()> {
+        crud::update_by_id(model_maanger.db.clone(), "users_auth", ua_fu, id).await?;
+
+        Ok(())
+    }
+
+    pub async fn delete(model_maanger: &ModelManager, id: Uuid) -> Result<()> {
+        crud::delete_by_id(model_maanger.db.clone(), "users_auth", id).await?;
+
+        Ok(())
     }
 }
 
