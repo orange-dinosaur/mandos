@@ -2,3 +2,7 @@
 
 # env vars
 .env
+
+
+# vscode settings
+.vscode/

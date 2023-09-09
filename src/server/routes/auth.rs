@@ -7,6 +7,7 @@ use crate::{
         user_auth::{self},
         ModelManager,
     },
+    utils,
 };
 
 pub async fn login(
@@ -24,8 +25,8 @@ pub async fn login(
 
     // get user from db
     // if email is not empty, search by email otherwise search by username
-    let _db_res = if !login_request.email.is_empty() {
-        user_auth::UserAuthBmc::get_from_email(&model_maanger, login_request.email)
+    let db_res = if !login_request.email.is_empty() {
+        user_auth::UserAuthBmc::get_from_email(&model_maanger, login_request.username)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
     } else {
@@ -34,15 +35,11 @@ pub async fn login(
             .map_err(|e| Status::internal(e.to_string()))?
     };
 
-    /* // check that the user exists
-    if login_request.username != "giulio" {
-        return Err(Status::not_found("user not found"));
-    }
-
     // check that the password is correct
-    if login_request.password != "secret" {
-        return Err(Status::unauthenticated("wrong password"));
-    } */
+    utils::verify_password(login_request.password, db_res.password)
+        .map_err(|e| Status::unauthenticated(e.to_string()))?;
+
+    // TODO: create session
 
     let res = LoginResponse {
         session_id: "session_id".to_string(),
@@ -80,6 +77,8 @@ pub async fn register(
             return Err(Status::internal(e.to_string()));
         }
     }
+
+    // TODO: send email to user to confirm email
 
     let res = RegisterResponse { success: true };
     Ok(Response::new(res))
