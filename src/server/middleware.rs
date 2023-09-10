@@ -20,11 +20,9 @@ pub fn check_auth(request: Request<()>) -> std::result::Result<Request<()>, Stat
 
     // get the auth value to validate request
     let grpc_auth_value = match config().ENVIRONMENT {
-        config::Environment::Test | config::Environment::Development => {
-            env::var("SERVICE_GRPC_AUTH_VALUE")
-                .map_err(|_| Status::unauthenticated("No valid auth token"))?
-        }
-        config::Environment::Production => env::var("SERVICE_GRPC_AUTH_VALUE")
+        config::Environment::Test | config::Environment::Development => env::var("GRPC_AUTH_VALUE")
+            .map_err(|_| Status::unauthenticated("No valid auth token"))?,
+        config::Environment::Production => env::var("GRPC_AUTH_VALUE")
             .map_err(|_| Status::unauthenticated("No valid auth token"))?,
     };
 

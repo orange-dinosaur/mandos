@@ -53,6 +53,9 @@ pub struct Config {
     // Database
     pub DB_URL: String,
     pub DB_MAX_CONNECTIONS: u32,
+
+    // Session Database
+    pub SESSION_DB_URL: String,
 }
 
 fn default_environment() -> Environment {
@@ -94,6 +97,8 @@ impl Config {
             |p| p.parse::<u32>().unwrap(),
         );
 
+        let session_db_url = get_session_db_url(&environment)?;
+
         Ok(Config {
             ENVIRONMENT: environment,
 
@@ -105,6 +110,8 @@ impl Config {
 
             DB_URL: db_url,
             DB_MAX_CONNECTIONS: db_max_connections,
+
+            SESSION_DB_URL: session_db_url,
         })
     }
 }
@@ -121,7 +128,7 @@ fn get_server_addr(env: &Environment) -> Result<String> {
 
     match env {
         Environment::Test => {
-            let server_url = get_env("SERVICE_SERVER_URL_TEST").map_or_else(
+            let server_url = get_env("SERVER_URL_TEST").map_or_else(
                 |_| default_server_url(),
                 |p| p.parse::<String>().unwrap_or(default_server_url()),
             );
@@ -129,7 +136,7 @@ fn get_server_addr(env: &Environment) -> Result<String> {
             Ok(server_url + ":" + &port)
         }
         Environment::Development => {
-            let server_url = get_env("SERVICE_SERVER_URL_DEV").map_or_else(
+            let server_url = get_env("SERVER_URL_DEV").map_or_else(
                 |_| default_server_url(),
                 |p| p.parse::<String>().unwrap_or(default_server_url()),
             );
@@ -157,7 +164,7 @@ fn get_tracing_max_level(env: &Environment) -> Result<Level> {
 fn get_grpc_auth_key(env: &Environment) -> Result<String> {
     match env {
         Environment::Test => {
-            let grpc_auth_key = get_env("SERVICE_GRPC_AUTH_KEY_TEST").map_or_else(
+            let grpc_auth_key = get_env("GRPC_AUTH_KEY_TEST").map_or_else(
                 |_| default_grpc_auth_key(),
                 |p| p.parse::<String>().unwrap_or(default_grpc_auth_key()),
             );
@@ -165,7 +172,7 @@ fn get_grpc_auth_key(env: &Environment) -> Result<String> {
             Ok(grpc_auth_key)
         }
         Environment::Development => {
-            let grpc_auth_key = get_env("SERVICE_GRPC_AUTH_KEY_DEV").map_or_else(
+            let grpc_auth_key = get_env("GRPC_AUTH_KEY_DEV").map_or_else(
                 |_| default_grpc_auth_key(),
                 |p| p.parse::<String>().unwrap_or(default_grpc_auth_key()),
             );
@@ -174,7 +181,7 @@ fn get_grpc_auth_key(env: &Environment) -> Result<String> {
         }
         Environment::Production => {
             // in production the server auth key and the value have to be set
-            let grpc_auth_key = get_env("SERVICE_GRPC_AUTH_KEY_TEST")?;
+            let grpc_auth_key = get_env("GRPC_AUTH_KEY_TEST")?;
 
             Ok(grpc_auth_key)
         }
@@ -184,22 +191,22 @@ fn get_grpc_auth_key(env: &Environment) -> Result<String> {
 fn get_db_url(env: &Environment) -> Result<String> {
     match env {
         Environment::Test => {
-            let db_user = get_env("SERVICE_DB_USER_TEST")?;
-            let db_password = get_env("SERVICE_DB_PASSWORD_TEST")?;
-            let db_host = get_env("SERVICE_DB_HOST_TEST")?;
-            let db_port = get_env("SERVICE_DB_PORT_TEST")?;
-            let db_name = get_env("SERVICE_DB_NAME_TEST")?;
+            let db_user = get_env("DB_USER_TEST")?;
+            let db_password = get_env("DB_PASSWORD_TEST")?;
+            let db_host = get_env("DB_HOST_TEST")?;
+            let db_port = get_env("DB_PORT_TEST")?;
+            let db_name = get_env("DB_NAME_TEST")?;
 
             Ok(format!(
                 "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
             ))
         }
         Environment::Development => {
-            let db_user = get_env("SERVICE_DB_USER_DEV")?;
-            let db_password = get_env("SERVICE_DB_PASSWORD_DEV")?;
-            let db_host = get_env("SERVICE_DB_HOST_DEV")?;
-            let db_port = get_env("SERVICE_DB_PORT_DEV")?;
-            let db_name = get_env("SERVICE_DB_NAME_DEV")?;
+            let db_user = get_env("DB_USER_DEV")?;
+            let db_password = get_env("DB_PASSWORD_DEV")?;
+            let db_host = get_env("DB_HOST_DEV")?;
+            let db_port = get_env("DB_PORT_DEV")?;
+            let db_name = get_env("DB_NAME_DEV")?;
 
             Ok(format!(
                 "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
@@ -214,6 +221,41 @@ fn get_db_url(env: &Environment) -> Result<String> {
 
             Ok(format!(
                 "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+            ))
+        }
+    }
+}
+
+fn get_session_db_url(env: &Environment) -> Result<String> {
+    match env {
+        Environment::Test => {
+            let session_db_user = get_env("SESSION_DB_USER_TEST")?;
+            let session_db_password = get_env("SESSION_DB_PASSWORD_TEST")?;
+            let session_db_host = get_env("SESSION_DB_HOST_TEST")?;
+            let session_db_port = get_env("SESSION_DB_PORT_TEST")?;
+
+            Ok(format!(
+                "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
+            ))
+        }
+        Environment::Development => {
+            let session_db_user = get_env("SESSION_DB_USER_DEV")?;
+            let session_db_password = get_env("SESSION_DB_PASSWORD_DEV")?;
+            let session_db_host = get_env("SESSION_DB_HOST_DEV")?;
+            let session_db_port = get_env("SESSION_DB_PORT_DEV")?;
+
+            Ok(format!(
+                "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
+            ))
+        }
+        Environment::Production => {
+            let session_db_user = get_env("SESSION_DB_USER")?;
+            let session_db_password = get_env("SESSION_DB_PASSWORD")?;
+            let session_db_host = get_env("SESSION_DB_HOST")?;
+            let session_db_port = get_env("SESSION_DB_PORT")?;
+
+            Ok(format!(
+                "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
             ))
         }
     }

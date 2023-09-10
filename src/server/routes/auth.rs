@@ -4,7 +4,7 @@ use tracing::debug;
 use crate::{
     mandos_auth::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse},
     model::{
-        user_auth::{self},
+        user_auth::{self, UserAuthBmc},
         ModelManager,
     },
     utils,
@@ -26,11 +26,11 @@ pub async fn login(
     // get user from db
     // if email is not empty, search by email otherwise search by username
     let db_res = if !login_request.email.is_empty() {
-        user_auth::UserAuthBmc::get_from_email(&model_maanger, login_request.username)
+        user_auth::UserAuthBmc::get_from_email(&model_maanger, login_request.email)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
     } else {
-        user_auth::UserAuthBmc::get_from_username(&model_maanger, login_request.email)
+        user_auth::UserAuthBmc::get_from_username(&model_maanger, login_request.username)
             .await
             .map_err(|e| Status::internal(e.to_string()))?
     };
@@ -39,11 +39,16 @@ pub async fn login(
     utils::verify_password(login_request.password, db_res.password)
         .map_err(|e| Status::unauthenticated(e.to_string()))?;
 
-    // TODO: create session
+    // create session in the db
+    let session_id = UserAuthBmc::create_session(
+        &model_maanger,
+        db_res.id.to_string(),
+        (60 * 60 * 24 * 30) as u64,
+    )
+    .await
+    .map_err(|e| Status::internal(e.to_string()))?;
 
-    let res = LoginResponse {
-        session_id: "session_id".to_string(),
-    };
+    let res = LoginResponse { session_id };
     Ok(Response::new(res))
 }
 

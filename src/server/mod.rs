@@ -16,7 +16,6 @@ use crate::{
 mod middleware;
 mod routes;
 
-#[derive(Debug)]
 pub struct ServiceMandosAuth {
     model_manager: model::ModelManager,
 }

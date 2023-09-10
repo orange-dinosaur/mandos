@@ -14,5 +14,5 @@ RUST_LOG="server=debug"
 #   (e.g., Kubernetes).
 
 # gRPC AUTH
-SERVICE_GRPC_AUTH_KEY_TEST="halls_of_mandos"
-SERVICE_GRPC_AUTH_KEY_DEV="halls_of_mandos"
+GRPC_AUTH_KEY_TEST="halls_of_mandos"
+GRPC_AUTH_KEY_DEV="halls_of_mandos"

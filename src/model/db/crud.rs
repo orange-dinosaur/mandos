@@ -52,7 +52,7 @@ where
     Ok(row)
 }
 
-pub async fn _get_one_by_id(db: Db, table_name: &str, id: Uuid) -> Result<DbRow> {
+pub async fn get_one_by_id(db: Db, table_name: &str, id: Uuid) -> Result<DbRow> {
     let query = format!("select * from {} where id = $1", table_name);
 
     let row = sqlx::query(&query)

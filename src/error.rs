@@ -1,6 +1,8 @@
 use std::net::AddrParseError;
 
 use argon2::password_hash;
+use deadpool_redis::{CreatePoolError, PoolError};
+use redis::RedisError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use sqlx::migrate::MigrateError;
@@ -23,6 +25,11 @@ pub enum Error {
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
     SqlxMigrate(#[serde_as(as = "DisplayFromStr")] MigrateError),
     SqlxEntityNotFound { entity: &'static str, id: String },
+
+    // Redis errors
+    Redis(#[serde_as(as = "DisplayFromStr")] RedisError),
+    RedisCreatePool(#[serde_as(as = "DisplayFromStr")] CreatePoolError),
+    RedisPool(#[serde_as(as = "DisplayFromStr")] PoolError),
 
     // Argon2 errors
     Argon2Error(#[serde_as(as = "DisplayFromStr")] argon2::Error),
@@ -60,6 +67,24 @@ impl From<sqlx::Error> for Error {
 impl From<MigrateError> for Error {
     fn from(e: MigrateError) -> Self {
         Self::SqlxMigrate(e)
+    }
+}
+
+impl From<RedisError> for Error {
+    fn from(e: RedisError) -> Self {
+        Self::Redis(e)
+    }
+}
+
+impl From<CreatePoolError> for Error {
+    fn from(e: CreatePoolError) -> Self {
+        Self::RedisCreatePool(e)
+    }
+}
+
+impl From<PoolError> for Error {
+    fn from(e: PoolError) -> Self {
+        Self::RedisPool(e)
     }
 }
 
