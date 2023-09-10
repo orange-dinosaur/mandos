@@ -6,7 +6,9 @@ use crate::{
     config, error,
     mandos_auth::{
         mandos_auth_server::{MandosAuth, MandosAuthServer},
-        LoginRequest, LoginResponse, RegisterRequest, RegisterResponse,
+        LoginRequest, LoginResponse, LogoutRequest, LogoutResponse, RegisterRequest,
+        RegisterResponse, UpdatePasswordRequest, UpdatePasswordResponse, ValidateRequest,
+        ValidateResponse,
     },
     mandos_auth_proto,
     model::{self, ModelManager},
@@ -35,11 +37,32 @@ impl MandosAuth for ServiceMandosAuth {
         routes::auth::login(request.into_inner(), self.model_manager.clone()).await
     }
 
+    async fn logout(
+        &self,
+        request: Request<LogoutRequest>,
+    ) -> Result<Response<LogoutResponse>, Status> {
+        routes::auth::logout(request.into_inner(), self.model_manager.clone()).await
+    }
+
     async fn register(
         &self,
         request: Request<RegisterRequest>,
     ) -> Result<Response<RegisterResponse>, Status> {
         routes::auth::register(request.into_inner(), self.model_manager.clone()).await
+    }
+
+    async fn validate_session(
+        &self,
+        request: Request<ValidateRequest>,
+    ) -> Result<Response<ValidateResponse>, Status> {
+        routes::auth::validate_session(request.into_inner(), self.model_manager.clone()).await
+    }
+
+    async fn update_password(
+        &self,
+        request: Request<UpdatePasswordRequest>,
+    ) -> Result<Response<UpdatePasswordResponse>, Status> {
+        routes::auth::update_password(request.into_inner(), self.model_manager.clone()).await
     }
 }
 

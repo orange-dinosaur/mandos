@@ -2,13 +2,23 @@ syntax = "proto3";
 package mandos_auth;
 
 service MandosAuth {
-    // Login - Takes a username and password and returns a session_id
+    // Login - Takes a username or email and password and returns a session_id
     rpc Login(LoginRequest) returns (LoginResponse) {}
+
+    // Logout - Takes a session_id and user_id and returns a success bool
+    rpc Logout(LogoutRequest) returns (LogoutResponse) {}
 
     // Register - Takes a username, an email and password and returns a success bool
     rpc Register(RegisterRequest) returns (RegisterResponse) {}
+
+    // ValidateSession - Takes a session_id and user_id and returns a success bool
+    rpc ValidateSession(ValidateRequest) returns (ValidateResponse) {}
+
+    // UpdatePassword - (Only for authenticated users) Takes a session_id, user_id, old_password and new_password and returns a success bool
+    rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse) {}
 }
 
+// Login
 message LoginRequest {
     string username = 1;
     string email = 2;
@@ -19,6 +29,18 @@ message LoginResponse {
     string session_id = 1;
 }
 
+// Logout
+message LogoutRequest {
+    string session_id = 1;
+    string user_id = 2;
+}
+
+message LogoutResponse {
+    bool success = 1;
+} 
+
+
+// Register
 message RegisterRequest {
     string username = 1;
     string email = 2;
@@ -26,5 +48,27 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
+    bool success = 1;
+}
+
+// ValidateSession
+message ValidateRequest {
+    string session_id = 1;
+    string user_id = 2;
+}
+
+message ValidateResponse {
+    bool success = 1;
+}
+
+// UpdatePassword
+message UpdatePasswordRequest {
+    string session_id = 1;
+    string user_id = 2;
+    string old_password = 3;
+    string new_password = 4;
+}
+
+message UpdatePasswordResponse {
     bool success = 1;
 }
