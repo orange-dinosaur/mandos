@@ -49,6 +49,7 @@ pub struct Config {
 
     // gRPC server auth credentials
     pub GRPC_AUTH_KEY: String,
+    pub GRPC_AUTH_VALUE: String,
 
     // Database
     pub DB_URL: String,
@@ -70,10 +71,6 @@ fn default_server_url() -> String {
     "127.0.0.1".to_string()
 }
 
-fn default_grpc_auth_key() -> String {
-    "halls_of_mandos".to_string()
-}
-
 fn default_db_max_connections() -> u32 {
     5
 }
@@ -90,6 +87,7 @@ impl Config {
         let tracing_max_level = get_tracing_max_level(&environment)?;
 
         let grpc_auth_key = get_grpc_auth_key(&environment)?;
+        let grpc_auth_value = get_grpc_auth_value(&environment)?;
 
         let db_url = get_db_url(&environment)?;
         let db_max_connections = get_env("DB_MAX_CONNECTIONS").map_or_else(
@@ -107,6 +105,7 @@ impl Config {
             TRACING_MAX_LEVEL: tracing_max_level,
 
             GRPC_AUTH_KEY: grpc_auth_key,
+            GRPC_AUTH_VALUE: grpc_auth_value,
 
             DB_URL: db_url,
             DB_MAX_CONNECTIONS: db_max_connections,
@@ -121,13 +120,13 @@ fn get_env(name: &'static str) -> Result<String> {
 }
 
 fn get_server_addr(env: &Environment) -> Result<String> {
-    let port = get_env("PORT").map_or_else(
-        |_| default_port(),
-        |p| p.parse::<String>().unwrap_or(default_port()),
-    );
-
     match env {
         Environment::Test => {
+            let port = get_env("SERVER_PORT_TEST").map_or_else(
+                |_| default_port(),
+                |p| p.parse::<String>().unwrap_or(default_port()),
+            );
+
             let server_url = get_env("SERVER_URL_TEST").map_or_else(
                 |_| default_server_url(),
                 |p| p.parse::<String>().unwrap_or(default_server_url()),
@@ -136,6 +135,11 @@ fn get_server_addr(env: &Environment) -> Result<String> {
             Ok(server_url + ":" + &port)
         }
         Environment::Development => {
+            let port = get_env("SERVER_PORT_DEV").map_or_else(
+                |_| default_port(),
+                |p| p.parse::<String>().unwrap_or(default_port()),
+            );
+
             let server_url = get_env("SERVER_URL_DEV").map_or_else(
                 |_| default_server_url(),
                 |p| p.parse::<String>().unwrap_or(default_server_url()),
@@ -145,7 +149,7 @@ fn get_server_addr(env: &Environment) -> Result<String> {
         }
         Environment::Production => {
             // in production the server url and the port have to be set
-            let port_prod = get_env("PORT_prod")?;
+            let port_prod = get_env("SERVER_PORT")?;
             let server_url = get_env("SERVER_URL")?;
 
             Ok(server_url + ":" + &port_prod)
@@ -164,24 +168,37 @@ fn get_tracing_max_level(env: &Environment) -> Result<Level> {
 fn get_grpc_auth_key(env: &Environment) -> Result<String> {
     match env {
         Environment::Test => {
-            let grpc_auth_key = get_env("GRPC_AUTH_KEY_TEST").map_or_else(
-                |_| default_grpc_auth_key(),
-                |p| p.parse::<String>().unwrap_or(default_grpc_auth_key()),
-            );
+            let grpc_auth_key = get_env("GRPC_AUTH_KEY_TEST")?;
 
             Ok(grpc_auth_key)
         }
         Environment::Development => {
-            let grpc_auth_key = get_env("GRPC_AUTH_KEY_DEV").map_or_else(
-                |_| default_grpc_auth_key(),
-                |p| p.parse::<String>().unwrap_or(default_grpc_auth_key()),
-            );
+            let grpc_auth_key = get_env("GRPC_AUTH_KEY_DEV")?;
 
             Ok(grpc_auth_key)
         }
         Environment::Production => {
-            // in production the server auth key and the value have to be set
-            let grpc_auth_key = get_env("GRPC_AUTH_KEY_TEST")?;
+            let grpc_auth_key = get_env("GRPC_AUTH_KEY")?;
+
+            Ok(grpc_auth_key)
+        }
+    }
+}
+
+fn get_grpc_auth_value(env: &Environment) -> Result<String> {
+    match env {
+        Environment::Test => {
+            let grpc_auth_key = get_env("GRPC_AUTH_VALUE_TEST")?;
+
+            Ok(grpc_auth_key)
+        }
+        Environment::Development => {
+            let grpc_auth_key = get_env("GRPC_AUTH_VALUE_DEV")?;
+
+            Ok(grpc_auth_key)
+        }
+        Environment::Production => {
+            let grpc_auth_key = get_env("GRPC_AUTH_VALUE")?;
 
             Ok(grpc_auth_key)
         }

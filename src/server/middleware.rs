@@ -1,5 +1,3 @@
-use std::env;
-
 use tonic::{Request, Status};
 use tracing::debug;
 
@@ -19,12 +17,7 @@ pub fn check_auth(request: Request<()>) -> std::result::Result<Request<()>, Stat
     };
 
     // get the auth value to validate request
-    let grpc_auth_value = match config().ENVIRONMENT {
-        config::Environment::Test | config::Environment::Development => env::var("GRPC_AUTH_VALUE")
-            .map_err(|_| Status::unauthenticated("No valid auth token"))?,
-        config::Environment::Production => env::var("GRPC_AUTH_VALUE")
-            .map_err(|_| Status::unauthenticated("No valid auth token"))?,
-    };
+    let grpc_auth_value = config().GRPC_AUTH_VALUE.clone();
 
     // check that that the auth value is correct
     if request_grpc_auth_value != grpc_auth_value {
