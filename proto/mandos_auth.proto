@@ -16,6 +16,9 @@ service MandosAuth {
 
     // UpdatePassword - (Only for authenticated users) Takes a session_id, user_id, old_password and new_password and returns a success bool
     rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse) {}
+
+    // DeleteAccount - (Only for authenticated users) Takes a session_id and user_id and returns a success bool
+    rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse) {}
 }
 
 // Login
@@ -70,5 +73,15 @@ message UpdatePasswordRequest {
 }
 
 message UpdatePasswordResponse {
+    bool success = 1;
+}
+
+// DeleteAccount
+message DeleteAccountRequest {
+    string session_id = 1;
+    string user_id = 2;
+}
+
+message DeleteAccountResponse {
     bool success = 1;
 }

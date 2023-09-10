@@ -4,9 +4,9 @@ use uuid::Uuid;
 
 use crate::{
     mandos_auth::{
-        LoginRequest, LoginResponse, LogoutRequest, LogoutResponse, RegisterRequest,
-        RegisterResponse, UpdatePasswordRequest, UpdatePasswordResponse, ValidateRequest,
-        ValidateResponse,
+        DeleteAccountRequest, DeleteAccountResponse, LoginRequest, LoginResponse, LogoutRequest,
+        LogoutResponse, RegisterRequest, RegisterResponse, UpdatePasswordRequest,
+        UpdatePasswordResponse, ValidateRequest, ValidateResponse,
     },
     model::{
         user_auth::{self, UserAuthBmc, UserAuthForUpdate},
@@ -229,5 +229,46 @@ pub async fn update_password(
         .map_err(|e| Status::internal(e.to_string()))?;
 
     let res = UpdatePasswordResponse { success: true };
+    Ok(Response::new(res))
+}
+
+pub async fn delete_account(
+    delete_account_request: DeleteAccountRequest,
+    model_maanger: ModelManager,
+) -> Result<Response<DeleteAccountResponse>, Status> {
+    debug!("FN: logout - Service to logout user");
+
+    // check that the fields are not empty
+    if delete_account_request.session_id.is_empty() || delete_account_request.user_id.is_empty() {
+        return Err(Status::invalid_argument("one ore more fields are empty"));
+    }
+
+    // get session from db
+    let (session_id, user_id) =
+        UserAuthBmc::get_session(&model_maanger, delete_account_request.session_id)
+            .await
+            .map_err(|e| Status::unauthenticated(e.to_string()))?;
+
+    // check that the user_id matches
+    if user_id != delete_account_request.user_id {
+        return Err(Status::invalid_argument(
+            "user_id does not match".to_string(),
+        ));
+    }
+
+    // delete user from db
+    let user_uuid =
+        Uuid::parse_str(user_id.as_str()).map_err(|e| Status::invalid_argument(e.to_string()))?;
+    UserAuthBmc::delete(&model_maanger, user_uuid)
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?;
+
+    // TODO: delete all user's sessions
+    // delete current session from db
+    UserAuthBmc::delete_session(&model_maanger, session_id)
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?;
+
+    let res = DeleteAccountResponse { success: true };
     Ok(Response::new(res))
 }

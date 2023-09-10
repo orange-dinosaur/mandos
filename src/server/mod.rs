@@ -6,9 +6,9 @@ use crate::{
     config, error,
     mandos_auth::{
         mandos_auth_server::{MandosAuth, MandosAuthServer},
-        LoginRequest, LoginResponse, LogoutRequest, LogoutResponse, RegisterRequest,
-        RegisterResponse, UpdatePasswordRequest, UpdatePasswordResponse, ValidateRequest,
-        ValidateResponse,
+        DeleteAccountRequest, DeleteAccountResponse, LoginRequest, LoginResponse, LogoutRequest,
+        LogoutResponse, RegisterRequest, RegisterResponse, UpdatePasswordRequest,
+        UpdatePasswordResponse, ValidateRequest, ValidateResponse,
     },
     mandos_auth_proto,
     model::{self, ModelManager},
@@ -63,6 +63,13 @@ impl MandosAuth for ServiceMandosAuth {
         request: Request<UpdatePasswordRequest>,
     ) -> Result<Response<UpdatePasswordResponse>, Status> {
         routes::auth::update_password(request.into_inner(), self.model_manager.clone()).await
+    }
+
+    async fn delete_account(
+        &self,
+        request: Request<DeleteAccountRequest>,
+    ) -> Result<Response<DeleteAccountResponse>, Status> {
+        routes::auth::delete_account(request.into_inner(), self.model_manager.clone()).await
     }
 }
 
