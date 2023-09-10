@@ -9,7 +9,7 @@ use crate::{
         UpdatePasswordResponse, ValidateRequest, ValidateResponse,
     },
     model::{
-        user_auth::{self, UserAuthBmc, UserAuthForUpdate},
+        user_auth::{self, model_controller::UserAuthBmc, UserAuthForUpdate},
         ModelManager,
     },
     utils,
@@ -31,13 +31,19 @@ pub async fn login(
     // get user from db
     // if email is not empty, search by email otherwise search by username
     let db_res = if !login_request.email.is_empty() {
-        user_auth::UserAuthBmc::get_from_email(&model_maanger, login_request.email)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
+        user_auth::model_controller::UserAuthBmc::get_from_email(
+            &model_maanger,
+            login_request.email,
+        )
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?
     } else {
-        user_auth::UserAuthBmc::get_from_username(&model_maanger, login_request.username)
-            .await
-            .map_err(|e| Status::internal(e.to_string()))?
+        user_auth::model_controller::UserAuthBmc::get_from_username(
+            &model_maanger,
+            login_request.username,
+        )
+        .await
+        .map_err(|e| Status::internal(e.to_string()))?
     };
 
     // check if the user is blocked or if it stills needs verification
@@ -126,7 +132,9 @@ pub async fn register(
     };
 
     // create user in the db
-    let db_res = user_auth::UserAuthBmc::create(&model_maanger, user_auth_for_create).await;
+    let db_res =
+        user_auth::model_controller::UserAuthBmc::create(&model_maanger, user_auth_for_create)
+            .await;
     match db_res {
         Ok(id) => {
             debug!("User created with id: {}", id);
@@ -199,7 +207,7 @@ pub async fn update_password(
     // get user from db
     let user_uuid = Uuid::parse_str(update_password_request.user_id.as_str())
         .map_err(|e| Status::invalid_argument(e.to_string()))?;
-    let db_res = user_auth::UserAuthBmc::get(&model_maanger, user_uuid)
+    let db_res = user_auth::model_controller::UserAuthBmc::get(&model_maanger, user_uuid)
         .await
         .map_err(|e| Status::internal(e.to_string()))?;
 
