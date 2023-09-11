@@ -2,6 +2,9 @@ syntax = "proto3";
 package mandos_auth;
 
 service MandosAuth {
+    // HealthCheck - Takes no arguments and returns a success bool
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+
     // Login - Takes a username or email and password and returns a session_id
     rpc Login(LoginRequest) returns (LoginResponse) {}
 
@@ -19,6 +22,13 @@ service MandosAuth {
 
     // DeleteAccount - (Only for authenticated users) Takes a session_id and user_id and returns a success bool
     rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse) {}
+}
+
+// HealthCheck
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    bool success = 1;
 }
 
 // Login

@@ -1,14 +1,15 @@
 use error::Result as CustomResult;
 use tonic::{transport::Server, Request, Response, Status};
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::{
     config, error,
     mandos_auth::{
         mandos_auth_server::{MandosAuth, MandosAuthServer},
-        DeleteAccountRequest, DeleteAccountResponse, LoginRequest, LoginResponse, LogoutRequest,
-        LogoutResponse, RegisterRequest, RegisterResponse, UpdatePasswordRequest,
-        UpdatePasswordResponse, ValidateRequest, ValidateResponse,
+        DeleteAccountRequest, DeleteAccountResponse, HealthCheckRequest, HealthCheckResponse,
+        LoginRequest, LoginResponse, LogoutRequest, LogoutResponse, RegisterRequest,
+        RegisterResponse, UpdatePasswordRequest, UpdatePasswordResponse, ValidateRequest,
+        ValidateResponse,
     },
     mandos_auth_proto,
     model::{self, ModelManager},
@@ -30,6 +31,16 @@ impl ServiceMandosAuth {
 
 #[tonic::async_trait]
 impl MandosAuth for ServiceMandosAuth {
+    async fn health_check(
+        &self,
+        _: Request<HealthCheckRequest>,
+    ) -> Result<Response<HealthCheckResponse>, Status> {
+        debug!("FN: health_check - Service to check if server is up");
+
+        let res = HealthCheckResponse { success: true };
+        Ok(Response::new(res))
+    }
+
     async fn login(
         &self,
         request: Request<LoginRequest>,

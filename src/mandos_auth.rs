@@ -1,3 +1,13 @@
+/// HealthCheck
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct HealthCheckRequest {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct HealthCheckResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+}
 /// Login
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -103,6 +113,14 @@ pub mod mandos_auth_server {
     /// Generated trait containing gRPC methods that should be implemented for use with MandosAuthServer.
     #[async_trait]
     pub trait MandosAuth: Send + Sync + 'static {
+        /// HealthCheck - Takes no arguments and returns a success bool
+        async fn health_check(
+            &self,
+            request: tonic::Request<super::HealthCheckRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::HealthCheckResponse>,
+            tonic::Status,
+        >;
         /// Login - Takes a username or email and password and returns a session_id
         async fn login(
             &self,
@@ -225,6 +243,52 @@ pub mod mandos_auth_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
+                "/mandos_auth.MandosAuth/HealthCheck" => {
+                    #[allow(non_camel_case_types)]
+                    struct HealthCheckSvc<T: MandosAuth>(pub Arc<T>);
+                    impl<
+                        T: MandosAuth,
+                    > tonic::server::UnaryService<super::HealthCheckRequest>
+                    for HealthCheckSvc<T> {
+                        type Response = super::HealthCheckResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::HealthCheckRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as MandosAuth>::health_check(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = HealthCheckSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
                 "/mandos_auth.MandosAuth/Login" => {
                     #[allow(non_camel_case_types)]
                     struct LoginSvc<T: MandosAuth>(pub Arc<T>);
