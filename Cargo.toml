@@ -18,7 +18,6 @@ tokio-stream = { version = "0.1.14", features = ["net"] }
 tonic = "0.10.0"
 tonic-reflection = "0.10.0"
 prost = "0.12.0"
-futures = "0.3.28" # For streams if they are needed in the future
 
 # Sqlx dependencies
 sqlx = { version = "0.7.1", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
