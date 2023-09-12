@@ -42,8 +42,6 @@ pub fn config() -> &'static Config {
 pub struct Config {
     pub ENVIRONMENT: Environment,
 
-    pub SERVER_ADDR: String,
-
     // Tracing
     pub TRACING_MAX_LEVEL: tracing::Level,
 
@@ -63,14 +61,6 @@ fn default_environment() -> Environment {
     Environment::Development
 }
 
-fn default_port() -> String {
-    "50051".to_string()
-}
-
-fn default_server_url() -> String {
-    "127.0.0.1".to_string()
-}
-
 fn default_db_max_connections() -> u32 {
     5
 }
@@ -81,8 +71,6 @@ impl Config {
             |_| default_environment(),
             |e| e.parse::<Environment>().unwrap_or(default_environment()),
         );
-
-        let server_addr = get_server_addr(&environment)?;
 
         let tracing_max_level = get_tracing_max_level(&environment)?;
 
@@ -100,8 +88,6 @@ impl Config {
         Ok(Config {
             ENVIRONMENT: environment,
 
-            SERVER_ADDR: server_addr,
-
             TRACING_MAX_LEVEL: tracing_max_level,
 
             GRPC_AUTH_KEY: grpc_auth_key,
@@ -117,44 +103,6 @@ impl Config {
 
 fn get_env(name: &'static str) -> Result<String> {
     env::var(name).map_err(|_| Error::ConfigMissingEnv(name))
-}
-
-fn get_server_addr(env: &Environment) -> Result<String> {
-    match env {
-        Environment::Test => {
-            let port = get_env("SERVER_PORT_TEST").map_or_else(
-                |_| default_port(),
-                |p| p.parse::<String>().unwrap_or(default_port()),
-            );
-
-            let server_url = get_env("SERVER_URL_TEST").map_or_else(
-                |_| default_server_url(),
-                |p| p.parse::<String>().unwrap_or(default_server_url()),
-            );
-
-            Ok(server_url + ":" + &port)
-        }
-        Environment::Development => {
-            let port = get_env("SERVER_PORT_DEV").map_or_else(
-                |_| default_port(),
-                |p| p.parse::<String>().unwrap_or(default_port()),
-            );
-
-            let server_url = get_env("SERVER_URL_DEV").map_or_else(
-                |_| default_server_url(),
-                |p| p.parse::<String>().unwrap_or(default_server_url()),
-            );
-
-            Ok(server_url + ":" + &port)
-        }
-        Environment::Production => {
-            // in production the server url and the port have to be set
-            let port_prod = get_env("SERVER_PORT")?;
-            let server_url = get_env("SERVER_URL")?;
-
-            Ok(server_url + ":" + &port_prod)
-        }
-    }
 }
 
 fn get_tracing_max_level(env: &Environment) -> Result<Level> {

@@ -3,7 +3,7 @@ use tonic::{transport::Server, Request, Response, Status};
 use tracing::{debug, info};
 
 use crate::{
-    config, error,
+    error,
     mandos_auth::{
         mandos_auth_server::{MandosAuth, MandosAuthServer},
         DeleteAccountRequest, DeleteAccountResponse, HealthCheckRequest, HealthCheckResponse,
@@ -85,10 +85,11 @@ impl MandosAuth for ServiceMandosAuth {
 }
 
 pub async fn start(model_manager: ModelManager) -> CustomResult<()> {
-    let addr = config().SERVER_ADDR.parse()?;
+    let addr = "0.0.0.0:50051".parse()?;
     let mandos_auth = ServiceMandosAuth::new(model_manager.clone());
 
     info!("Starting gRPC server on {}", addr);
+    println!("Starting gRPC server on {}", addr);
 
     let reflection_service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(mandos_auth_proto::FILE_DESCRIPTOR_SET)
