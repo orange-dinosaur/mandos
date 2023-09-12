@@ -1,4 +1,3 @@
-use dotenvy::dotenv;
 use error::Result;
 
 pub use config::config;
@@ -10,6 +9,7 @@ pub mod error;
 pub mod mandos_auth;
 pub mod model;
 pub mod server;
+pub mod tracing;
 pub mod utils;
 
 mod mandos_auth_proto {
@@ -22,19 +22,10 @@ mod mandos_auth_proto {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    println!("\n##########################");
-    println!("##        MANDOS        ##");
-    println!("##########################\n");
+    utils::print_app_name("Mandos", 30, 2);
 
-    // Load environment variables
-    dotenv().ok();
-
-    // Setup tracing
-    tracing_subscriber::fmt()
-        .with_max_level(config().TRACING_MAX_LEVEL)
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-        .with_target(false)
-        .init();
+    // Initialize tracing
+    tracing::initialize();
 
     // Initialize ModelManager
     let model_manager = ModelManager::new().await?;
