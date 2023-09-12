@@ -30,3 +30,41 @@ pub fn verify_password(password: String, password_hash: String) -> Result<(), Er
 
     Ok(())
 }
+
+pub fn print_app_name(app_name: &str, mut len: usize, border: usize) {
+    let mut num_spaces = (len - (border * 2) - app_name.len()) / 2;
+    if num_spaces % 2 != 0 {
+        num_spaces += 1;
+        len += 1;
+    }
+
+    // print top border
+    println!();
+    for _ in 0..len {
+        print!("#");
+    }
+    println!();
+
+    // region: print app name row
+    print!("##");
+    for _ in 0..num_spaces {
+        print!(" ");
+    }
+
+    print!("{app_name}");
+
+    for _ in 0..num_spaces {
+        print!(" ");
+    }
+    print!("##");
+    println!();
+    // endregion: print app name row
+
+    // print bottom border
+    for _ in 0..len {
+        print!("#");
+    }
+
+    println!();
+    println!();
+}
