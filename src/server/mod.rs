@@ -89,7 +89,6 @@ pub async fn start(model_manager: ModelManager) -> CustomResult<()> {
     let mandos_auth = ServiceMandosAuth::new(model_manager.clone());
 
     info!("Starting gRPC server on {}", addr);
-    println!("Starting gRPC server on {}", addr);
 
     let reflection_service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(mandos_auth_proto::FILE_DESCRIPTOR_SET)
