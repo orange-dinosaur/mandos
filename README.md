@@ -7,7 +7,7 @@ gRPC server for user Authentication, Authorization and Session Management writte
 Command to run the server:
 
 ```bash
-cargo watch -q -c -w src/ -x "run --release --bin server"
+cargo watch -q -c -w src/ -x "run --release --bin mandos"
 ```
 
 ## Env variables
@@ -23,10 +23,6 @@ export ENVIRONMENT="production"
 # gRPC Server
 export GRPC_AUTH_KEY="key"
 export GRPC_AUTH_VALUE="secret"
-# Optional for test and development enviroments (default: 127.0.0.1)
-export SERVER_URL="127.0.0.1"
-# Optional for test and development enviroments (default: 50051)
-export SERVER_PORT="0000"
 
 # Database (PostgreSQL)
 export DB_USER="db_user"
@@ -52,8 +48,6 @@ If for example the environment is set to ```development``` the environment varia
 # gRPC Server
 export GRPC_AUTH_KEY_DEV="key"
 export GRPC_AUTH_VALUE_DEV="secret"
-export SERVER_URL_DEV="127.0.0.1"
-export SERVER_PORT_DEV="0000"
 
 # Database (PostgreSQL)
 export DB_USER_DEV="db_user"
