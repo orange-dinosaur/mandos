@@ -5,14 +5,10 @@
 [env]
 
 # Scope down tracing, to filter out external lib tracing
-RUST_LOG="server=debug"
+RUST_LOG="mandos=trace"
 
 # -- Service Environment Variables
 # IMPORTANT: 
 #   For cargo commands only.
 #   For deployed env, should be managed by container 
 #   (e.g., Kubernetes).
-
-# gRPC AUTH
-GRPC_AUTH_KEY_TEST="halls_of_mandos"
-GRPC_AUTH_KEY_DEV="halls_of_mandos"
