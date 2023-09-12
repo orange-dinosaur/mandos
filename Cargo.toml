@@ -38,7 +38,6 @@ tracing-subscriber = {version = "0.3.17", features = ["env-filter"]}
 # Other dependencies
 uuid ={ version = "1.4.1", features = ["serde", "v4", "fast-rng"] }
 strum_macros = "0.25.2"
-dotenvy = "0.15.7"
 argon2 = "0.5.1"
 chrono = { version = "0.4.26", features = ["serde"] }
 

@@ -964,7 +964,6 @@ dependencies = [
  "argon2",
  "chrono",
  "deadpool-redis",
- "dotenvy",
  "prost",
  "redis",
  "serde",
