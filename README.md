@@ -39,26 +39,3 @@ export SESSION_DB_PASSWORD="session_db_password"
 export SESSION_DB_HOST="session_db_hostname"
 export SESSION_DB_PORT="0000"
 ```
-
-If the environment is set to ```test``` or ```development``` the environment variables have to have postfix ```_TEST``` or ```_DEV``` (Except for `ENVIRONMENT` and `DB_MAX_CONNECTIONS`).
-
-If for example the environment is set to ```development``` the environment variables will have to look like this:
-
-```bash
-# gRPC Server
-export GRPC_AUTH_KEY_DEV="key"
-export GRPC_AUTH_VALUE_DEV="secret"
-
-# Database (PostgreSQL)
-export DB_USER_DEV="db_user"
-export DB_PASSWORD_DEV="db_password"
-export DB_HOST_DEV="db_hostname"
-export DB_PORT_DEV="0000"
-export DB_NAME_DEV="db_name"
-
-# Session Database (Redis)
-export SESSION_DB_USER_DEV="session_db_user"
-export SESSION_DB_PASSWORD_DEV="session_db_password"
-export SESSION_DB_HOST_DEV="session_db_hostname"
-export SESSION_DB_PORT_DEV="0000"
-```

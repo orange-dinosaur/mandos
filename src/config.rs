@@ -77,13 +77,13 @@ impl Config {
         let grpc_auth_key = get_env("GRPC_AUTH_KEY")?;
         let grpc_auth_value = get_env("GRPC_AUTH_VALUE")?;
 
-        let db_url = get_db_url(&environment)?;
+        let db_url = get_db_url()?;
         let db_max_connections = get_env("DB_MAX_CONNECTIONS").map_or_else(
             |_| default_db_max_connections(),
             |p| p.parse::<u32>().unwrap(),
         );
 
-        let session_db_url = get_session_db_url(&environment)?;
+        let session_db_url = get_session_db_url()?;
 
         Ok(Config {
             ENVIRONMENT: environment,
@@ -113,75 +113,25 @@ fn get_tracing_max_level(env: &Environment) -> Result<Level> {
     }
 }
 
-fn get_db_url(env: &Environment) -> Result<String> {
-    match env {
-        Environment::Test => {
-            let db_user = get_env("DB_USER_TEST")?;
-            let db_password = get_env("DB_PASSWORD_TEST")?;
-            let db_host = get_env("DB_HOST_TEST")?;
-            let db_port = get_env("DB_PORT_TEST")?;
-            let db_name = get_env("DB_NAME_TEST")?;
+fn get_db_url() -> Result<String> {
+    let db_user = get_env("DB_USER")?;
+    let db_password = get_env("DB_PASSWORD")?;
+    let db_host = get_env("DB_HOST")?;
+    let db_port = get_env("DB_PORT")?;
+    let db_name = get_env("DB_NAME")?;
 
-            Ok(format!(
-                "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            ))
-        }
-        Environment::Development => {
-            let db_user = get_env("DB_USER_DEV")?;
-            let db_password = get_env("DB_PASSWORD_DEV")?;
-            let db_host = get_env("DB_HOST_DEV")?;
-            let db_port = get_env("DB_PORT_DEV")?;
-            let db_name = get_env("DB_NAME_DEV")?;
-
-            Ok(format!(
-                "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            ))
-        }
-        Environment::Production => {
-            let db_user = get_env("DB_USER")?;
-            let db_password = get_env("DB_PASSWORD")?;
-            let db_host = get_env("DB_HOST")?;
-            let db_port = get_env("DB_PORT")?;
-            let db_name = get_env("DB_NAME")?;
-
-            Ok(format!(
-                "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            ))
-        }
-    }
+    Ok(format!(
+        "postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    ))
 }
 
-fn get_session_db_url(env: &Environment) -> Result<String> {
-    match env {
-        Environment::Test => {
-            let session_db_user = get_env("SESSION_DB_USER_TEST")?;
-            let session_db_password = get_env("SESSION_DB_PASSWORD_TEST")?;
-            let session_db_host = get_env("SESSION_DB_HOST_TEST")?;
-            let session_db_port = get_env("SESSION_DB_PORT_TEST")?;
+fn get_session_db_url() -> Result<String> {
+    let session_db_user = get_env("SESSION_DB_USER")?;
+    let session_db_password = get_env("SESSION_DB_PASSWORD")?;
+    let session_db_host = get_env("SESSION_DB_HOST")?;
+    let session_db_port = get_env("SESSION_DB_PORT")?;
 
-            Ok(format!(
-                "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
-            ))
-        }
-        Environment::Development => {
-            let session_db_user = get_env("SESSION_DB_USER_DEV")?;
-            let session_db_password = get_env("SESSION_DB_PASSWORD_DEV")?;
-            let session_db_host = get_env("SESSION_DB_HOST_DEV")?;
-            let session_db_port = get_env("SESSION_DB_PORT_DEV")?;
-
-            Ok(format!(
-                "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
-            ))
-        }
-        Environment::Production => {
-            let session_db_user = get_env("SESSION_DB_USER")?;
-            let session_db_password = get_env("SESSION_DB_PASSWORD")?;
-            let session_db_host = get_env("SESSION_DB_HOST")?;
-            let session_db_port = get_env("SESSION_DB_PORT")?;
-
-            Ok(format!(
-                "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
-            ))
-        }
-    }
+    Ok(format!(
+        "redis://{session_db_user}:{session_db_password}@{session_db_host}:{session_db_port}"
+    ))
 }
