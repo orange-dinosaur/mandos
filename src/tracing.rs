@@ -1,7 +1,7 @@
 use tracing::info;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
-use crate::config;
+use crate::config::config;
 
 pub fn initialize() {
     let env_filter = EnvFilter::try_new("mandos=trace").unwrap_or_else(|_| EnvFilter::new("info"));

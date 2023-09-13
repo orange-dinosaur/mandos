@@ -6,7 +6,7 @@ use sqlx::{
 };
 
 use crate::{
-    config,
+    config::config,
     error::{Error, Result},
 };
 

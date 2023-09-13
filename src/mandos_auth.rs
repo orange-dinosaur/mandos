@@ -106,6 +106,269 @@ pub struct DeleteAccountResponse {
     #[prost(bool, tag = "1")]
     pub success: bool,
 }
+/// Generated client implementations.
+pub mod mandos_auth_client {
+    #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
+    use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
+    #[derive(Debug, Clone)]
+    pub struct MandosAuthClient<T> {
+        inner: tonic::client::Grpc<T>,
+    }
+    impl MandosAuthClient<tonic::transport::Channel> {
+        /// Attempt to create a new client by connecting to a given endpoint.
+        pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
+        where
+            D: TryInto<tonic::transport::Endpoint>,
+            D::Error: Into<StdError>,
+        {
+            let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
+            Ok(Self::new(conn))
+        }
+    }
+    impl<T> MandosAuthClient<T>
+    where
+        T: tonic::client::GrpcService<tonic::body::BoxBody>,
+        T::Error: Into<StdError>,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
+        <T::ResponseBody as Body>::Error: Into<StdError> + Send,
+    {
+        pub fn new(inner: T) -> Self {
+            let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_origin(inner: T, origin: Uri) -> Self {
+            let inner = tonic::client::Grpc::with_origin(inner, origin);
+            Self { inner }
+        }
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> MandosAuthClient<InterceptedService<T, F>>
+        where
+            F: tonic::service::Interceptor,
+            T::ResponseBody: Default,
+            T: tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+                Response = http::Response<
+                    <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
+                >,
+            >,
+            <T as tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+            >>::Error: Into<StdError> + Send + Sync,
+        {
+            MandosAuthClient::new(InterceptedService::new(inner, interceptor))
+        }
+        /// Compress requests with the given encoding.
+        ///
+        /// This requires the server to support it otherwise it might respond with an
+        /// error.
+        #[must_use]
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.send_compressed(encoding);
+            self
+        }
+        /// Enable decompressing responses.
+        #[must_use]
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.accept_compressed(encoding);
+            self
+        }
+        /// Limits the maximum size of a decoded message.
+        ///
+        /// Default: `4MB`
+        #[must_use]
+        pub fn max_decoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_decoding_message_size(limit);
+            self
+        }
+        /// Limits the maximum size of an encoded message.
+        ///
+        /// Default: `usize::MAX`
+        #[must_use]
+        pub fn max_encoding_message_size(mut self, limit: usize) -> Self {
+            self.inner = self.inner.max_encoding_message_size(limit);
+            self
+        }
+        /// HealthCheck - Takes no arguments and returns a success bool
+        pub async fn health_check(
+            &mut self,
+            request: impl tonic::IntoRequest<super::HealthCheckRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::HealthCheckResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/HealthCheck",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "HealthCheck"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// Login - Takes a username or email and password and returns a session_id
+        pub async fn login(
+            &mut self,
+            request: impl tonic::IntoRequest<super::LoginRequest>,
+        ) -> std::result::Result<tonic::Response<super::LoginResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/Login",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "Login"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// Logout - Takes a session_id and user_id and returns a success bool
+        pub async fn logout(
+            &mut self,
+            request: impl tonic::IntoRequest<super::LogoutRequest>,
+        ) -> std::result::Result<tonic::Response<super::LogoutResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/Logout",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "Logout"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// Register - Takes a username, an email and password and returns a success bool
+        pub async fn register(
+            &mut self,
+            request: impl tonic::IntoRequest<super::RegisterRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::RegisterResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/Register",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "Register"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// ValidateSession - Takes a session_id and user_id and returns a success bool
+        pub async fn validate_session(
+            &mut self,
+            request: impl tonic::IntoRequest<super::ValidateRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/ValidateSession",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "ValidateSession"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// UpdatePassword - (Only for authenticated users) Takes a session_id, user_id, old_password and new_password and returns a success bool
+        pub async fn update_password(
+            &mut self,
+            request: impl tonic::IntoRequest<super::UpdatePasswordRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::UpdatePasswordResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/UpdatePassword",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "UpdatePassword"));
+            self.inner.unary(req, path, codec).await
+        }
+        /// DeleteAccount - (Only for authenticated users) Takes a session_id and user_id and returns a success bool
+        pub async fn delete_account(
+            &mut self,
+            request: impl tonic::IntoRequest<super::DeleteAccountRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::DeleteAccountResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/mandos_auth.MandosAuth/DeleteAccount",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("mandos_auth.MandosAuth", "DeleteAccount"));
+            self.inner.unary(req, path, codec).await
+        }
+    }
+}
 /// Generated server implementations.
 pub mod mandos_auth_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
