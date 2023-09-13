@@ -40,8 +40,6 @@ pub fn config() -> &'static Config {
 
 #[allow(non_snake_case)]
 pub struct Config {
-    pub ENVIRONMENT: Environment,
-
     // Tracing
     pub TRACING_MAX_LEVEL: tracing::Level,
 
@@ -86,8 +84,6 @@ impl Config {
         let session_db_url = get_session_db_url()?;
 
         Ok(Config {
-            ENVIRONMENT: environment,
-
             TRACING_MAX_LEVEL: tracing_max_level,
 
             GRPC_AUTH_KEY: grpc_auth_key,
