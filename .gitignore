@@ -1,10 +1,11 @@
+# Exclude build artifacts
 /target
 
-# env vars
+# Exclude env vars
 .env
 
-# IDE files
+# Exclude IDE files
 .vscode/
 
-# Docker
+# Exclude docker-compose
 docker-compose.yml

@@ -74,8 +74,8 @@ impl Config {
 
         let tracing_max_level = get_tracing_max_level(&environment)?;
 
-        let grpc_auth_key = get_grpc_auth_key(&environment)?;
-        let grpc_auth_value = get_grpc_auth_value(&environment)?;
+        let grpc_auth_key = get_env("GRPC_AUTH_KEY")?;
+        let grpc_auth_value = get_env("GRPC_AUTH_VALUE")?;
 
         let db_url = get_db_url(&environment)?;
         let db_max_connections = get_env("DB_MAX_CONNECTIONS").map_or_else(
@@ -110,46 +110,6 @@ fn get_tracing_max_level(env: &Environment) -> Result<Level> {
         Environment::Test => Ok(tracing::Level::TRACE),
         Environment::Development => Ok(tracing::Level::TRACE),
         Environment::Production => Ok(tracing::Level::INFO),
-    }
-}
-
-fn get_grpc_auth_key(env: &Environment) -> Result<String> {
-    match env {
-        Environment::Test => {
-            let grpc_auth_key = get_env("GRPC_AUTH_KEY_TEST")?;
-
-            Ok(grpc_auth_key)
-        }
-        Environment::Development => {
-            let grpc_auth_key = get_env("GRPC_AUTH_KEY_DEV")?;
-
-            Ok(grpc_auth_key)
-        }
-        Environment::Production => {
-            let grpc_auth_key = get_env("GRPC_AUTH_KEY")?;
-
-            Ok(grpc_auth_key)
-        }
-    }
-}
-
-fn get_grpc_auth_value(env: &Environment) -> Result<String> {
-    match env {
-        Environment::Test => {
-            let grpc_auth_key = get_env("GRPC_AUTH_VALUE_TEST")?;
-
-            Ok(grpc_auth_key)
-        }
-        Environment::Development => {
-            let grpc_auth_key = get_env("GRPC_AUTH_VALUE_DEV")?;
-
-            Ok(grpc_auth_key)
-        }
-        Environment::Production => {
-            let grpc_auth_key = get_env("GRPC_AUTH_VALUE")?;
-
-            Ok(grpc_auth_key)
-        }
     }
 }
 

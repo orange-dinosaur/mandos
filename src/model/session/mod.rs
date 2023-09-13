@@ -1,7 +1,7 @@
 use deadpool_redis::{Config, Pool, Runtime};
 
 use crate::{
-    config,
+    config::config,
     error::{Error, Result},
 };
 

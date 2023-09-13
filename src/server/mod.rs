@@ -1,4 +1,5 @@
-use error::Result as CustomResult;
+use std::time::Duration;
+
 use tonic::{transport::Server, Request, Response, Status};
 use tracing::{debug, info};
 
@@ -16,7 +17,7 @@ use crate::{
     server::middleware::check_auth,
 };
 
-mod middleware;
+pub mod middleware;
 mod routes;
 
 pub struct ServiceMandosAuth {
@@ -84,7 +85,7 @@ impl MandosAuth for ServiceMandosAuth {
     }
 }
 
-pub async fn start(model_manager: ModelManager) -> CustomResult<()> {
+pub async fn start(model_manager: ModelManager) -> error::Result<()> {
     let addr = "0.0.0.0:50051".parse()?;
     let mandos_auth = ServiceMandosAuth::new(model_manager.clone());
 
@@ -100,6 +101,26 @@ pub async fn start(model_manager: ModelManager) -> CustomResult<()> {
         .add_service(reflection_service)
         .serve(addr)
         .await?;
+
+    Ok(())
+}
+
+pub async fn start_background(model_manager: ModelManager) -> error::Result<()> {
+    let addr = "0.0.0.0:50051".parse()?;
+    let mandos_auth = ServiceMandosAuth::new(model_manager.clone());
+
+    tokio::spawn(async move {
+        let server = Server::builder()
+            .add_service(MandosAuthServer::with_interceptor(mandos_auth, check_auth))
+            .serve(addr)
+            .await;
+        if let Err(e) = server {
+            e.to_string();
+        }
+    });
+
+    // Wait for the server to be ready (optional)
+    tokio::time::sleep(Duration::from_secs(2)).await;
 
     Ok(())
 }

@@ -1,7 +1,7 @@
 use tonic::{Request, Status};
 use tracing::debug;
 
-use crate::config;
+use crate::config::config;
 
 pub fn check_auth(request: Request<()>) -> std::result::Result<Request<()>, Status> {
     debug!("FN: check_auth - Verifying auth token");
