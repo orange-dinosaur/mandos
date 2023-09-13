@@ -9,6 +9,8 @@ use mandos::{
 use tonic::transport::Server;
 
 pub async fn start_background_grpc_server(addr: String) -> Result<()> {
+    dotenvy::from_filename_override(".tests.env").expect("Failed to load .tests.env file");
+
     // Initialize ModelManager
     let model_manager = ModelManager::new().await?;
 
