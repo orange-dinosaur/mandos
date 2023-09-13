@@ -11,8 +11,10 @@ RUN apt-get update && apt-get install -y protobuf-compiler
 COPY Cargo.toml Cargo.lock ./
 
 # Build the dependencies without the source code to cache dependencies
-RUN mkdir src && echo "fn main() {println!(\"dummy\")}" > src/main.rs
-RUN cargo build --release --bin mandos
+RUN mkdir src
+RUN echo "fn main() {println!(\"dummy\")}" > src/main.rs
+RUN echo "fn lib() {println!(\"dummy\")}" > src/lib.rs
+RUN cargo build
 
 # Copy the rest of the source code into the container
 COPY . .
