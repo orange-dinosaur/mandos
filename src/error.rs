@@ -42,6 +42,9 @@ pub enum Error {
 
     // Generic errors
     Service(String),
+
+    // Generic tests error
+    Test(String),
 }
 
 // region: impl From

@@ -1,15 +1,21 @@
 use std::time::Duration;
 
 use mandos::{
+    config::config,
     error::Result,
-    mandos_auth::mandos_auth_server::MandosAuthServer,
+    mandos_auth::{mandos_auth_client::MandosAuthClient, mandos_auth_server::MandosAuthServer},
     model::ModelManager,
     server::{middleware::check_auth, ServiceMandosAuth},
 };
-use tonic::transport::Server;
+use tonic::{
+    metadata::MetadataValue,
+    service::interceptor::InterceptedService,
+    transport::{Channel, Server},
+    Request, Status,
+};
 
-pub async fn start_background_grpc_server(addr: String) -> Result<()> {
-    dotenvy::from_filename_override(".tests.env").expect("Failed to load .tests.env file");
+pub async fn start_background_grpc_server(addr: String) -> Result<ModelManager> {
+    dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
 
     // Initialize ModelManager
     let model_manager = ModelManager::new().await?;
@@ -30,5 +36,30 @@ pub async fn start_background_grpc_server(addr: String) -> Result<()> {
     // Wait for the server to be ready (optional)
     tokio::time::sleep(Duration::from_secs(2)).await;
 
-    Ok(())
+    Ok(model_manager)
+}
+
+pub async fn get_grpc_client(
+    client_addr: &'static str,
+) -> Result<
+    MandosAuthClient<
+        InterceptedService<
+            tonic::transport::Channel,
+            impl Fn(Request<()>) -> core::result::Result<Request<()>, Status>,
+        >,
+    >,
+> {
+    // connect to the server and run the test
+    let channel = Channel::from_static(client_addr).connect().await?;
+
+    let grpc_auth_key = config().GRPC_AUTH_KEY.as_str();
+    let grpc_auth_value: MetadataValue<_> = config().GRPC_AUTH_VALUE.as_str().parse().unwrap();
+
+    let client = MandosAuthClient::with_interceptor(channel, move |mut req: Request<()>| {
+        req.metadata_mut()
+            .insert(grpc_auth_key, grpc_auth_value.clone());
+        Ok(req)
+    });
+
+    Ok(client)
 }

@@ -2,7 +2,7 @@
 /target
 
 # Exclude env vars
-*.env
+*.env*
 
 # Exclude IDE files
 .vscode/

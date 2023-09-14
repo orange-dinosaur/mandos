@@ -46,7 +46,7 @@ Command to run the tests:
 cargo test
 ```
 
-Inside the ```root``` directory there as to be an ```.tests.env``` file that will be used to load environment variables for the tests.
+Inside the ```root``` directory there as to be an ```.env.test``` file that will be used to load environment variables for the tests.
 The file has to contain the following variables:
 
 ```bash
