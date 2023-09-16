@@ -22,8 +22,7 @@ pub async fn create(session_db: SessionDb, value: String, expiration: u64) -> Re
     cmd("SET")
         .arg(&[key.clone(), value, "EX".to_string(), expiration.to_string()])
         .query_async(&mut session_db_conn)
-        .await
-        .map_err(Error::Redis)?;
+        .await?;
 
     Ok(key)
 }
@@ -41,8 +40,7 @@ pub async fn get(session_db: SessionDb, key: String) -> Result<(String, String)>
     let value = cmd("GET")
         .arg(&[&key])
         .query_async(&mut session_db_conn)
-        .await
-        .map_err(Error::Redis)?;
+        .await?;
 
     Ok((key, value))
 }
@@ -58,6 +56,21 @@ pub async fn delete(session_db: SessionDb, key: String) -> Result<()> {
     // delete the value from the db
     cmd("DEL")
         .arg(&[key])
+        .query_async(&mut session_db_conn)
+        .await?;
+
+    Ok(())
+}
+
+/// Delete all records from the session db
+/// # Arguments
+/// * `session_db` - The session db connection pool
+pub async fn flush_db(session_db: SessionDb) -> Result<()> {
+    // get connection to session db
+    let mut session_db_conn = session_db.get().await?;
+
+    // delete the value from the db
+    cmd("FLUSHDB")
         .query_async(&mut session_db_conn)
         .await
         .map_err(Error::Redis)?;
