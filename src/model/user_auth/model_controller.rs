@@ -14,18 +14,18 @@ pub struct UserAuthBmc;
 impl UserAuthBmc {
     // region: Db CRUD operations
 
-    pub async fn create(model_maanger: &ModelManager, ua_fc: UserAuthForCreate) -> Result<Uuid> {
+    pub async fn create(model_manager: &ModelManager, ua_fc: UserAuthForCreate) -> Result<Uuid> {
         let user_auth = UserAuth::new(ua_fc)?;
 
-        let res = db::crud::create(model_maanger.db().clone(), TABLE_NAME, user_auth).await?;
+        let res = db::crud::create(model_manager.db().clone(), TABLE_NAME, user_auth).await?;
 
         let user_auth_created = UserAuth::from_row(&res)?;
 
         Ok(user_auth_created.id)
     }
 
-    pub async fn get(model_maanger: &ModelManager, id: Uuid) -> Result<UserAuth> {
-        let res = db::crud::get_one_by_id(model_maanger.db().clone(), TABLE_NAME, id).await?;
+    pub async fn get(model_manager: &ModelManager, id: Uuid) -> Result<UserAuth> {
+        let res = db::crud::get_one_by_id(model_manager.db().clone(), TABLE_NAME, id).await?;
 
         let user_auth = UserAuth::from_row(&res)?;
 
@@ -33,11 +33,11 @@ impl UserAuthBmc {
     }
 
     pub async fn get_from_username(
-        model_maanger: &ModelManager,
+        model_manager: &ModelManager,
         username: String,
     ) -> Result<UserAuth> {
         let res = db::crud::get_one_by_field(
-            model_maanger.db().clone(),
+            model_manager.db().clone(),
             TABLE_NAME,
             "username",
             IterableType::String(username),
@@ -50,11 +50,11 @@ impl UserAuthBmc {
     }
 
     pub async fn get_from_email(
-        model_maanger: &ModelManager,
+        model_manager: &ModelManager,
         username: String,
     ) -> Result<UserAuth> {
         let res = db::crud::get_one_by_field(
-            model_maanger.db().clone(),
+            model_manager.db().clone(),
             TABLE_NAME,
             "email",
             IterableType::String(username),
@@ -66,8 +66,8 @@ impl UserAuthBmc {
         Ok(user_auth)
     }
 
-    pub async fn get_all(model_maanger: &ModelManager) -> Result<Vec<UserAuth>> {
-        let res = db::crud::get_all(model_maanger.db().clone(), TABLE_NAME).await?;
+    pub async fn get_all(model_manager: &ModelManager) -> Result<Vec<UserAuth>> {
+        let res = db::crud::get_all(model_manager.db().clone(), TABLE_NAME).await?;
 
         let mut user_auths = Vec::new();
         for user_auth in res {
@@ -79,17 +79,17 @@ impl UserAuthBmc {
     }
 
     pub async fn update(
-        model_maanger: &ModelManager,
+        model_manager: &ModelManager,
         ua_fu: UserAuthForUpdate,
         id: Uuid,
     ) -> Result<()> {
-        db::crud::update_by_id(model_maanger.db.clone(), TABLE_NAME, ua_fu, id).await?;
+        db::crud::update_by_id(model_manager.db.clone(), TABLE_NAME, ua_fu, id).await?;
 
         Ok(())
     }
 
-    pub async fn delete(model_maanger: &ModelManager, id: Uuid) -> Result<()> {
-        db::crud::delete_by_id(model_maanger.db.clone(), TABLE_NAME, id).await?;
+    pub async fn delete(model_manager: &ModelManager, id: Uuid) -> Result<()> {
+        db::crud::delete_by_id(model_manager.db.clone(), TABLE_NAME, id).await?;
 
         Ok(())
     }
@@ -99,27 +99,27 @@ impl UserAuthBmc {
     // region: Session Db CRUD operations
 
     pub async fn create_session(
-        model_maanger: &ModelManager,
+        model_manager: &ModelManager,
         value: String,
         expiration: u64,
     ) -> Result<String> {
         let res =
-            session::crud::create(model_maanger.session_db().clone(), value, expiration).await?;
+            session::crud::create(model_manager.session_db().clone(), value, expiration).await?;
 
         Ok(res)
     }
 
     pub async fn get_session(
-        model_maanger: &ModelManager,
+        model_manager: &ModelManager,
         session_id: String,
     ) -> Result<(String, String)> {
-        let res = session::crud::get(model_maanger.session_db().clone(), session_id).await?;
+        let res = session::crud::get(model_manager.session_db().clone(), session_id).await?;
 
         Ok(res)
     }
 
-    pub async fn delete_session(model_maanger: &ModelManager, session_id: String) -> Result<()> {
-        session::crud::delete(model_maanger.session_db().clone(), session_id).await?;
+    pub async fn delete_session(model_manager: &ModelManager, session_id: String) -> Result<()> {
+        session::crud::delete(model_manager.session_db().clone(), session_id).await?;
 
         Ok(())
     }
