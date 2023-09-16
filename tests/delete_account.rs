@@ -1,6 +1,6 @@
 use mandos::{
     error::{Error, Result},
-    mandos_auth::LogoutRequest,
+    mandos_auth::DeleteAccountRequest,
     model::{
         db, session,
         user_auth::{UserAuth, UserAuthForCreate},
@@ -10,7 +10,7 @@ use mandos::{
 use sqlx::FromRow;
 
 #[tokio::test]
-async fn logout_works() -> Result<()> {
+async fn delete_account_works() -> Result<()> {
     // Initialize env variables
     dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
 
@@ -48,19 +48,27 @@ async fn logout_works() -> Result<()> {
     )
     .await?;
 
-    // region: call logout grpc method
-    let request = tonic::Request::new(LogoutRequest {
+    // region: call login grpc method
+    let request = tonic::Request::new(DeleteAccountRequest {
         session_id: session_id.clone(),
         user_id: user_auth_db.id.to_string().clone(),
     });
 
     client
-        .logout(request)
+        .delete_account(request)
         .await
-        .map_err(|s| Error::Test(s.to_string()))?;
-    // endregion: call logout grpc method
+        .map_err(|s| Error::Test(s.to_string()))?
+        .into_inner();
+    // endregion: call login grpc method
 
     // region: tests
+
+    // check that the user has been deleted
+    let user_still_exists =
+        db::crud::get_one_by_id(model_manager.db().clone(), "users_auth", user_auth_db.id)
+            .await
+            .is_ok();
+    assert!(!user_still_exists);
 
     // check that the session has been deleted
     let session_still_exists = session::crud::get(model_manager.session_db().clone(), session_id)
