@@ -1,7 +1,7 @@
 use mandos::{
     error::{Error, Result},
     mandos_auth::RegisterRequest,
-    model::user_auth::UserAuth,
+    model::{session, user_auth::UserAuth},
     utils,
 };
 use sqlx::FromRow;
@@ -22,14 +22,17 @@ async fn register_works() -> Result<()> {
     // get the grpc client
     let mut client = get_grpc_client(client_addr).await?;
 
-    // clean database table before running the test
+    // clean all databases before running the test
     sqlx::query("delete from users_auth")
         .execute(model_manager.db())
         .await?;
+    session::crud::flush_db(model_manager.session_db().clone()).await?;
 
     let username = "username".to_string();
     let email = "email@email.com".to_string();
     let password = "secret".to_string();
+
+    // region: call register grpc method
     let request = tonic::Request::new(RegisterRequest {
         username: username.clone(),
         email: email.clone(),
@@ -40,6 +43,7 @@ async fn register_works() -> Result<()> {
         .register(request)
         .await
         .map_err(|s| Error::Test(s.to_string()))?;
+    // endregion: call register grpc method
 
     // get the user from the database
     let row = sqlx::query("select * from users_auth where username = $1 and email = $2")
@@ -50,16 +54,22 @@ async fn register_works() -> Result<()> {
 
     let user_auth = UserAuth::from_row(&row)?;
 
-    // check that the user was created in the database
+    // region: tests
+
     assert!(
         user_auth.id != Uuid::nil() && user_auth.username == username && user_auth.email == email
     );
+
+    // check that the passwords match
     utils::verify_password(password, user_auth.password)?;
 
-    // clean database table after running the test
+    // endregion: tests
+
+    // clean all databases after running the test
     sqlx::query("delete from users_auth")
         .execute(model_manager.db())
         .await?;
+    session::crud::flush_db(model_manager.session_db().clone()).await?;
 
     Ok(())
 }
