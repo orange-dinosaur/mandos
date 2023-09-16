@@ -9,8 +9,20 @@ use mandos::{
 };
 use sqlx::FromRow;
 
+/// Test that the delete_account grpc method works
+/// Steps:
+/// 1. Setup test environment (Env variables, run server in the backgroung, get client)
+/// 2. Clean all databases
+/// 3. Create a user in the database
+/// 4. Create a session for the user
+/// 5. Call the delete_account grpc method
+/// 6. Check that the user has been deleted
+/// 7. Check that the session has been deleted
+/// 8. Clean all databases
 #[tokio::test]
 async fn delete_account_works() -> Result<()> {
+    // region: setup test environment
+
     // Initialize env variables
     dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
 
@@ -22,6 +34,8 @@ async fn delete_account_works() -> Result<()> {
 
     // get the grpc client
     let mut client = utils_tests::get_grpc_client(client_addr).await?;
+
+    // endregion: setup test environment
 
     // clean all databases before running the test
     utils_tests::clean_all_dbs(model_manager.clone()).await?;
@@ -48,7 +62,8 @@ async fn delete_account_works() -> Result<()> {
     )
     .await?;
 
-    // region: call login grpc method
+    // region: call grpc method
+
     let request = tonic::Request::new(DeleteAccountRequest {
         session_id: session_id.clone(),
         user_id: user_auth_db.id.to_string().clone(),
@@ -59,7 +74,8 @@ async fn delete_account_works() -> Result<()> {
         .await
         .map_err(|s| Error::Test(s.to_string()))?
         .into_inner();
-    // endregion: call login grpc method
+
+    // endregion: call grpc method
 
     // region: tests
 

@@ -7,8 +7,19 @@ use mandos::{
 use sqlx::FromRow;
 use uuid::Uuid;
 
+/// Test that the register grpc method works
+/// Steps:
+/// 1. Setup test environment (Env variables, run server in the backgroung, get client)
+/// 2. Clean all databases
+/// 3. Define user to be registered
+/// 4. Call the register grpc method
+/// 5. Check that the user has been created
+/// 6. Check that the user password is correct
+/// 7. Clean all databases
 #[tokio::test]
 async fn register_works() -> Result<()> {
+    // region: setup test environment
+
     // Initialize env variables
     dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
 
@@ -21,6 +32,8 @@ async fn register_works() -> Result<()> {
     // get the grpc client
     let mut client = utils_tests::get_grpc_client(client_addr).await?;
 
+    // endregion: setup test environment
+
     // clean all databases before running the test
     utils_tests::clean_all_dbs(model_manager.clone()).await?;
 
@@ -28,7 +41,8 @@ async fn register_works() -> Result<()> {
     let email = "email@email.com".to_string();
     let password = "secret".to_string();
 
-    // region: call register grpc method
+    // region: call grpc method
+
     let request = tonic::Request::new(RegisterRequest {
         username: username.clone(),
         email: email.clone(),
@@ -39,7 +53,8 @@ async fn register_works() -> Result<()> {
         .register(request)
         .await
         .map_err(|s| Error::Test(s.to_string()))?;
-    // endregion: call register grpc method
+
+    // endregion: call grpc method
 
     // get the user from the database
     let row = sqlx::query("select * from users_auth where username = $1 and email = $2")
