@@ -3,9 +3,8 @@ use mandos::{
     mandos_auth::HealthCheckRequest,
 };
 
-use crate::test_utils::{get_grpc_client, start_background_grpc_server};
-
-mod test_utils;
+#[path = "tests_utils.rs"]
+mod tests_utils;
 
 #[tokio::test]
 async fn health_check_works() -> Result<()> {
@@ -13,10 +12,10 @@ async fn health_check_works() -> Result<()> {
     let client_addr: &'static str = "http://0.0.0.0:50051";
 
     // Run the server in the background
-    start_background_grpc_server(addr).await?;
+    tests_utils::start_background_grpc_server(addr).await?;
 
     // get the grpc client
-    let mut client = get_grpc_client(client_addr).await?;
+    let mut client = tests_utils::get_grpc_client(client_addr).await?;
 
     let request = tonic::Request::new(HealthCheckRequest {});
 

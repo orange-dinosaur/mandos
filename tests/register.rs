@@ -7,9 +7,8 @@ use mandos::{
 use sqlx::FromRow;
 use uuid::Uuid;
 
-use crate::test_utils::{get_grpc_client, start_background_grpc_server};
-
-mod test_utils;
+#[path = "tests_utils.rs"]
+mod tests_utils;
 
 #[tokio::test]
 async fn register_works() -> Result<()> {
@@ -17,13 +16,13 @@ async fn register_works() -> Result<()> {
     let client_addr = "http://0.0.0.0:50051";
 
     // Run the server in the background
-    let model_manager = start_background_grpc_server(addr).await?;
+    let model_manager = tests_utils::start_background_grpc_server(addr).await?;
 
     // get the grpc client
-    let mut client = get_grpc_client(client_addr).await?;
+    let mut client = tests_utils::get_grpc_client(client_addr).await?;
 
     // clean all databases before running the test
-    test_utils::clean_all_dbs(model_manager.clone()).await?;
+    tests_utils::clean_all_dbs(model_manager.clone()).await?;
 
     let username = "username".to_string();
     let email = "email@email.com".to_string();
@@ -63,7 +62,7 @@ async fn register_works() -> Result<()> {
     // endregion: tests
 
     // clean all databases after running the test
-    test_utils::clean_all_dbs(model_manager.clone()).await?;
+    tests_utils::clean_all_dbs(model_manager.clone()).await?;
 
     Ok(())
 }
