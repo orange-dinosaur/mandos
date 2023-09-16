@@ -21,21 +21,8 @@ use uuid::Uuid;
 /// 7. Clean all databases
 #[tokio::test]
 async fn login_works() -> Result<()> {
-    // region: setup test environment
-
-    // Initialize env variables
-    dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
-
-    let addr = "0.0.0.0:50051".to_string();
-    let client_addr = "http://0.0.0.0:50051";
-
-    // Run the server in the background
-    let model_manager = utils_tests::start_background_grpc_server(addr).await?;
-
-    // get the grpc client
-    let mut client = utils_tests::get_grpc_client(client_addr).await?;
-
-    // endregion: setup test environment
+    // setup test environment
+    let (model_manager, mut client) = utils_tests::setup_test_environment().await?;
 
     // clean all databases before running the test
     utils_tests::clean_all_dbs(model_manager.clone()).await?;

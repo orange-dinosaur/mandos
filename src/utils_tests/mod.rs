@@ -14,7 +14,40 @@ use tonic::{
     Request, Status,
 };
 
-pub async fn start_background_grpc_server(addr: String) -> Result<ModelManager> {
+pub async fn clean_all_dbs(model_manager: ModelManager) -> Result<()> {
+    sqlx::query("delete from users_auth")
+        .execute(model_manager.db())
+        .await?;
+    session::crud::flush_db(model_manager.session_db().clone()).await?;
+
+    Ok(())
+}
+
+pub async fn setup_test_environment() -> Result<(
+    ModelManager,
+    MandosAuthClient<
+        InterceptedService<
+            tonic::transport::Channel,
+            impl Fn(Request<()>) -> core::result::Result<Request<()>, Status>,
+        >,
+    >,
+)> {
+    // Initialize env variables
+    dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
+
+    let addr = "0.0.0.0:50051".to_string();
+    let client_addr = "http://0.0.0.0:50051";
+
+    // Run the server in the background
+    let model_manager = start_background_grpc_server(addr).await?;
+
+    // get the grpc client
+    let client = get_grpc_client(client_addr).await?;
+
+    Ok((model_manager, client))
+}
+
+async fn start_background_grpc_server(addr: String) -> Result<ModelManager> {
     // Initialize ModelManager
     let model_manager = ModelManager::new().await?;
 
@@ -37,7 +70,7 @@ pub async fn start_background_grpc_server(addr: String) -> Result<ModelManager> 
     Ok(model_manager)
 }
 
-pub async fn get_grpc_client(
+async fn get_grpc_client(
     client_addr: &'static str,
 ) -> Result<
     MandosAuthClient<
@@ -60,13 +93,4 @@ pub async fn get_grpc_client(
     });
 
     Ok(client)
-}
-
-pub async fn clean_all_dbs(model_manager: ModelManager) -> Result<()> {
-    sqlx::query("delete from users_auth")
-        .execute(model_manager.db())
-        .await?;
-    session::crud::flush_db(model_manager.session_db().clone()).await?;
-
-    Ok(())
 }
