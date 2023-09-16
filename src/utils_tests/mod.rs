@@ -62,7 +62,6 @@ pub async fn get_grpc_client(
     Ok(client)
 }
 
-#[allow(dead_code)]
 pub async fn clean_all_dbs(model_manager: ModelManager) -> Result<()> {
     sqlx::query("delete from users_auth")
         .execute(model_manager.db())
