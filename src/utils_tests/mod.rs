@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use mandos::{
+use crate::{
     config::config,
     error::Result,
     mandos_auth::{mandos_auth_client::MandosAuthClient, mandos_auth_server::MandosAuthServer},
@@ -15,8 +15,6 @@ use tonic::{
 };
 
 pub async fn start_background_grpc_server(addr: String) -> Result<ModelManager> {
-    dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
-
     // Initialize ModelManager
     let model_manager = ModelManager::new().await?;
 

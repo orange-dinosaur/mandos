@@ -2,27 +2,27 @@ use mandos::{
     error::{Error, Result},
     mandos_auth::RegisterRequest,
     model::user_auth::UserAuth,
-    utils,
+    utils, utils_tests,
 };
 use sqlx::FromRow;
 use uuid::Uuid;
 
-#[path = "tests_utils.rs"]
-mod tests_utils;
-
 #[tokio::test]
 async fn register_works() -> Result<()> {
+    // Initialize env variables
+    dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
+
     let addr = "0.0.0.0:50051".to_string();
     let client_addr = "http://0.0.0.0:50051";
 
     // Run the server in the background
-    let model_manager = tests_utils::start_background_grpc_server(addr).await?;
+    let model_manager = utils_tests::start_background_grpc_server(addr).await?;
 
     // get the grpc client
-    let mut client = tests_utils::get_grpc_client(client_addr).await?;
+    let mut client = utils_tests::get_grpc_client(client_addr).await?;
 
     // clean all databases before running the test
-    tests_utils::clean_all_dbs(model_manager.clone()).await?;
+    utils_tests::clean_all_dbs(model_manager.clone()).await?;
 
     let username = "username".to_string();
     let email = "email@email.com".to_string();
@@ -62,7 +62,7 @@ async fn register_works() -> Result<()> {
     // endregion: tests
 
     // clean all databases after running the test
-    tests_utils::clean_all_dbs(model_manager.clone()).await?;
+    utils_tests::clean_all_dbs(model_manager.clone()).await?;
 
     Ok(())
 }

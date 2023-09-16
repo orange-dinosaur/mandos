@@ -5,6 +5,7 @@ pub mod model;
 pub mod server;
 pub mod tracing;
 pub mod utils;
+pub mod utils_tests;
 
 use model::ModelManager;
 

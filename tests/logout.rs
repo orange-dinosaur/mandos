@@ -1,6 +1,6 @@
 use mandos::{
     error::{Error, Result},
-    mandos_auth::LoginRequest,
+    mandos_auth::LogoutRequest,
     model::{
         db, session,
         user_auth::{UserAuth, UserAuthForCreate},
@@ -8,10 +8,9 @@ use mandos::{
     utils_tests,
 };
 use sqlx::FromRow;
-use uuid::Uuid;
 
 #[tokio::test]
-async fn login_works() -> Result<()> {
+async fn logout_works() -> Result<()> {
     // Initialize env variables
     dotenvy::from_filename_override(".env.test").expect("Failed to load .env.test file");
 
@@ -41,31 +40,33 @@ async fn login_works() -> Result<()> {
     // newly created user
     let user_auth_db = UserAuth::from_row(&res)?;
 
-    // region: call login grpc method
-    let request = tonic::Request::new(LoginRequest {
-        username: "".to_string(),
-        email: email.clone(),
-        password: password.clone(),
+    // create a session for the user
+    let session_id = session::crud::create(
+        model_manager.session_db().clone(),
+        user_auth_db.id.to_string().clone(),
+        60,
+    )
+    .await?;
+
+    // region: call logout grpc method
+    let request = tonic::Request::new(LogoutRequest {
+        session_id: session_id.clone(),
+        user_id: user_auth_db.id.to_string().clone(),
     });
 
-    let login_res = client
-        .login(request)
+    client
+        .logout(request)
         .await
-        .map_err(|s| Error::Test(s.to_string()))?
-        .into_inner();
-    // endregion: call login grpc method
+        .map_err(|s| Error::Test(s.to_string()))?;
+    // endregion: call logout grpc method
 
     // region: tests
 
-    // check that the last_login field was updated
-    assert!(user_auth_db.last_login != user_auth.last_login);
-
-    // check that the session_id exists in the database and matches the user_id
-    let (_, session_user_id) =
-        session::crud::get(model_manager.session_db().clone(), login_res.session_id).await?;
-    let session_user_uuid =
-        Uuid::parse_str(&session_user_id).map_err(|s| Error::Test(s.to_string()))?;
-    assert!(session_user_uuid == user_auth_db.id);
+    // check that the session was deleted from the database
+    let session_res = session::crud::get(model_manager.session_db().clone(), session_id)
+        .await
+        .is_ok();
+    assert!(!session_res);
 
     // endregion: tests
 
