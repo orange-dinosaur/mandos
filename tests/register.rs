@@ -1,7 +1,7 @@
 use mandos::{
     error::{Error, Result},
     mandos_auth::RegisterRequest,
-    model::{session, user_auth::UserAuth},
+    model::user_auth::UserAuth,
     utils,
 };
 use sqlx::FromRow;
@@ -23,10 +23,7 @@ async fn register_works() -> Result<()> {
     let mut client = get_grpc_client(client_addr).await?;
 
     // clean all databases before running the test
-    sqlx::query("delete from users_auth")
-        .execute(model_manager.db())
-        .await?;
-    session::crud::flush_db(model_manager.session_db().clone()).await?;
+    test_utils::clean_all_dbs(model_manager.clone()).await?;
 
     let username = "username".to_string();
     let email = "email@email.com".to_string();
@@ -66,10 +63,7 @@ async fn register_works() -> Result<()> {
     // endregion: tests
 
     // clean all databases after running the test
-    sqlx::query("delete from users_auth")
-        .execute(model_manager.db())
-        .await?;
-    session::crud::flush_db(model_manager.session_db().clone()).await?;
+    test_utils::clean_all_dbs(model_manager.clone()).await?;
 
     Ok(())
 }

@@ -25,10 +25,7 @@ async fn login_works() -> Result<()> {
     let mut client = get_grpc_client(client_addr).await?;
 
     // clean all databases before running the test
-    sqlx::query("delete from users_auth")
-        .execute(model_manager.db())
-        .await?;
-    session::crud::flush_db(model_manager.session_db().clone()).await?;
+    test_utils::clean_all_dbs(model_manager.clone()).await?;
 
     // create the user in the database for login
     let username = "username".to_string();
@@ -73,10 +70,7 @@ async fn login_works() -> Result<()> {
     // endregion: tests
 
     // clean al databases after running the test
-    sqlx::query("delete from users_auth")
-        .execute(model_manager.db())
-        .await?;
-    session::crud::flush_db(model_manager.session_db().clone()).await?;
+    test_utils::clean_all_dbs(model_manager.clone()).await?;
 
     Ok(())
 }

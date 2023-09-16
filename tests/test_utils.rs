@@ -4,7 +4,7 @@ use mandos::{
     config::config,
     error::Result,
     mandos_auth::{mandos_auth_client::MandosAuthClient, mandos_auth_server::MandosAuthServer},
-    model::ModelManager,
+    model::{session, ModelManager},
     server::{middleware::check_auth, ServiceMandosAuth},
 };
 use tonic::{
@@ -62,4 +62,13 @@ pub async fn get_grpc_client(
     });
 
     Ok(client)
+}
+
+pub async fn clean_all_dbs(model_manager: ModelManager) -> Result<()> {
+    sqlx::query("delete from users_auth")
+        .execute(model_manager.db())
+        .await?;
+    session::crud::flush_db(model_manager.session_db().clone()).await?;
+
+    Ok(())
 }
